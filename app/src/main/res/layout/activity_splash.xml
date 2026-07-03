@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#7952C8">
 
     <ImageView
-        android:id="@+id/splashImage"
+        android:id="@+id/ivSplashGif"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/splash_bg"
-        android:alpha="0" />
-
-</FrameLayout>
+        android:scaleType="centerCrop" />
+</RelativeLayout>
