@@ -67,7 +67,7 @@ public class SplashActivity extends AppCompatActivity {
                 .into(ivSplashGif);
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+            startActivity(new Intent(SplashActivity.this, WelcomeActivity.class));
             finish();
         }, SPLASH_DURATION_MS);
     }

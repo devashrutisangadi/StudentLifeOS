@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/bg_welcome_gradient"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/tvWelcomeTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="32dp"
+        android:fontFamily="serif"
+        android:text="Welcome !"
+        android:textColor="#1A1A1A"
+        android:textSize="42sp" />
+
+    <ImageView
+        android:id="@+id/ivWelcomeIllustration"
+        android:layout_width="wrap_content"
+        android:layout_height="652dp"
+        android:layout_above="@id/btnCreateAccount"
+        android:layout_below="@id/tvWelcomeTitle"
+        android:layout_marginTop="-93dp"
+        android:layout_marginBottom="-124dp"
+        android:contentDescription="@string/welcome_illustration_desc"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_welcome_illustration" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCreateAccount"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_above="@id/btnLogIn"
+        android:layout_marginBottom="16dp"
+        android:text="Create Account"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        android:textSize="17sp"
+        app:backgroundTint="#FFFFFF"
+        app:strokeColor="#000000"
+        app:strokeWidth="2dp"
+        app:cornerRadius="28dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLogIn"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="33dp"
+        android:text="Log In"
+        android:textColor="#FFFFFF"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        app:backgroundTint="@android:color/transparent"
+        app:cornerRadius="28dp"
+        app:strokeColor="#000000"
+        app:strokeWidth="2dp" />
+</RelativeLayout>
