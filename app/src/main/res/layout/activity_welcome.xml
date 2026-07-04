@@ -20,11 +20,11 @@
     <ImageView
         android:id="@+id/ivWelcomeIllustration"
         android:layout_width="wrap_content"
-        android:layout_height="652dp"
+        android:layout_height="662dp"
         android:layout_above="@id/btnCreateAccount"
         android:layout_below="@id/tvWelcomeTitle"
         android:layout_marginTop="-93dp"
-        android:layout_marginBottom="-124dp"
+        android:layout_marginBottom="-125dp"
         android:contentDescription="@string/welcome_illustration_desc"
         android:scaleType="centerInside"
         android:src="@drawable/ic_welcome_illustration" />
