@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="signup_card_bg">#1E1B2E</color>
+    <color name="text_dark">#F0EDFA</color>
+    <color name="hint_gray">#8880A6</color>
+    <color name="edittext_bg">#2A2640</color>
+    <color name="edittext_stroke">#3A3560</color>
+    <color name="button_peach">#D9A9A2</color>
+    <color name="button_outline">#B49CE8</color>
+    <color name="divider_gray">#3A3560</color>
+</resources>

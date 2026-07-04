@@ -46,19 +46,15 @@
     <color name="login_button_start">#F7A8C4</color>
     <color name="login_button_end">#BFA2DB</color>
 
-
-    <color name="sage_success_container">#D4E6C3</color>
-    <color name="on_sage_success_container">#1A3A0F</color>
-    <color name="sage_success_indicator">#4A7C3F</color>
-
-    <color name="info_container">#D6E8F5</color>
-    <color name="blue_bell">#a2a2d0</color>
-    <color name="bone">#e3dac9</color>
-
-    <color name="bright_lavendar">#b494e4</color>
-    <color name="bright_ube">#d19fe8</color>
-    <color name="bubble_gum">#FFc1cc</color>
-    <color name="bubbles">#e7feff</color>
+<!-- Drawable Colors -->
+    <color name="signup_card_bg">#FFFFFF</color>
+    <color name="text_dark">#2E2A47</color>
+    <color name="hint_gray">#A6A0BE</color>
+    <color name="edittext_bg">#F1EDFB</color>
+    <color name="edittext_stroke">#DCD3F5</color>
+    <color name="button_peach">#F3C6C0</color>
+    <color name="button_outline">#9B7FE0</color>
+    <color name="divider_gray">#E0E0E0</color>
 
     <color name="secondary">#7D5A44</color>
     <color name="on_secondary">#F5F1EA</color>
