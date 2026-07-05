@@ -137,7 +137,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginTop="8dp"
-                android:text="Forget Password ?"
+                android:text="Forgot Password ?"
                 android:textColor="@color/text_dark"
                 android:textSize="13sp"
                 android:clickable="true"

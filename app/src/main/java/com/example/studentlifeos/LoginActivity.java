@@ -1,10 +1,13 @@
 package com.example.studentlifeos;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
-import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,7 +26,6 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -31,8 +33,12 @@ import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String PREFS_NAME = "login_prefs";
+    private static final String KEY_SAVED_EMAIL = "saved_email";
+
     private FirebaseAuth auth;
     private GoogleSignInClient googleSignInClient;
+    private boolean isPasswordVisible = false;
 
     private final ActivityResultLauncher<Intent> googleSignInLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -61,7 +67,53 @@ public class LoginActivity extends AppCompatActivity {
 
         EditText etEmail = findViewById(R.id.etEmail);
         EditText etPassword = findViewById(R.id.etPassword);
+        ImageView ivTogglePassword = findViewById(R.id.ivTogglePassword);
+        CheckBox cbRememberMe = findViewById(R.id.cbRememberMe);
+        TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
         ProgressBar progress = findViewById(R.id.loginProgress);
+
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        // Pre-fill and check "Remember Me" if we saved an email last time
+        String savedEmail = prefs.getString(KEY_SAVED_EMAIL, null);
+        if (savedEmail != null) {
+            etEmail.setText(savedEmail);
+            cbRememberMe.setChecked(true);
+        }
+
+        // Back button -> just leave this screen (returns to Welcome)
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+
+        // Password show/hide toggle
+        ivTogglePassword.setOnClickListener(v -> {
+            isPasswordVisible = !isPasswordVisible;
+            if (isPasswordVisible) {
+                etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                ivTogglePassword.setImageResource(R.drawable.ic_eye_open);
+            } else {
+                etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                ivTogglePassword.setImageResource(R.drawable.ic_eye_closed);
+            }
+            etPassword.setSelection(etPassword.getText().length()); // keep cursor at end
+        });
+
+        // Forgot password -> Firebase's built-in reset email flow
+        tvForgotPassword.setOnClickListener(v -> {
+            String email = etEmail.getText().toString().trim();
+            if (email.isEmpty()) {
+                Toast.makeText(this, "Enter your email first", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            auth.sendPasswordResetEmail(email).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(this, "Password reset email sent", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, "Couldn't send reset email: " +
+                                    (task.getException() != null ? task.getException().getMessage() : ""),
+                            Toast.LENGTH_LONG).show();
+                }
+            });
+        });
 
         findViewById(R.id.btnLogin).setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
@@ -77,6 +129,11 @@ public class LoginActivity extends AppCompatActivity {
                     .addOnCompleteListener(task -> {
                         progress.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
+                            if (cbRememberMe.isChecked()) {
+                                prefs.edit().putString(KEY_SAVED_EMAIL, email).apply();
+                            } else {
+                                prefs.edit().remove(KEY_SAVED_EMAIL).apply();
+                            }
                             goToDashboard();
                         } else {
                             String msg = task.getException() != null
@@ -100,7 +157,6 @@ public class LoginActivity extends AppCompatActivity {
         auth.signInWithCredential(credential).addOnCompleteListener(authTask -> {
             if (authTask.isSuccessful()) {
                 FirebaseUser user = auth.getCurrentUser();
-                DocumentSnapshot.class.getName(); // no-op, keeps import used in some setups
                 FirebaseFirestore.getInstance()
                         .collection("users")
                         .document(user.getUid())

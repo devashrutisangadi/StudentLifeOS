@@ -1,61 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="32dp">
+    android:background="@drawable/bg_gradient_purple_pink">
 
-    <TextView
+    <!-- Back button -->
+    <LinearLayout
+        android:id="@+id/btnBack"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Student Life OS"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp" />
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        android:padding="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-    <EditText
-        android:id="@+id/etEmail"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Email"
-        android:inputType="textEmailAddress" />
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@color/white" />
 
-    <EditText
-        android:id="@+id/etPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Password"
-        android:inputType="textPassword"
-        android:layout_marginTop="12dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:text="Back"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+    </LinearLayout>
 
-    <Button
-        android:id="@+id/btnLogin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Log In"
-        android:layout_marginTop="20dp" />
+    <!-- White rounded card -->
+    <View
+        android:id="@+id/loginCardBg"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_white_top_rounded"
+        android:layout_marginTop="140dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-    <Button
-        android:id="@+id/btnGoogleSignIn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Sign in with Google"
-        android:layout_marginTop="12dp" />
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="24dp"
+        app:layout_constraintTop_toTopOf="@id/loginCardBg"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-    <TextView
-        android:id="@+id/tvGoToSignup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New here? Create an account"
-        android:layout_marginTop="20dp"
-        android:textColor="#1a73e8" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="28dp"
+            android:paddingTop="36dp">
 
-    <ProgressBar
-        android:id="@+id/loginProgress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:visibility="gone" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Welcome Back"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"
+                android:fontFamily="serif"
+                android:layout_gravity="center_horizontal" />
 
-</LinearLayout>
+            <!-- Email -->
+            <EditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="32dp"
+                android:background="@drawable/bg_edittext_signup"
+                android:hint="Enter Email"
+                android:inputType="textEmailAddress"
+                android:paddingHorizontal="16dp"
+                android:textColorHint="@color/hint_gray"
+                android:textSize="15sp" />
+
+            <!-- Password + eye toggle -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp">
+
+                <EditText
+                    android:id="@+id/etPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_edittext_signup"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="48dp"
+                    android:textColorHint="@color/hint_gray"
+                    android:textSize="15sp" />
+
+                <ImageView
+                    android:id="@+id/ivTogglePassword"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="14dp"
+                    android:src="@drawable/ic_eye_closed"
+                    android:contentDescription="Show password"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </RelativeLayout>
+
+            <!-- Remember Me + Forget Password row -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+
+                <CheckBox
+                    android:id="@+id/cbRememberMe"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:text="Remember Me"
+                    android:textColor="@color/text_dark"
+                    android:textSize="13sp"
+                    android:buttonTint="@color/checkbox_tint" />
+
+                <TextView
+                    android:id="@+id/tvForgotPassword"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:text="Forgot Password?"
+                    android:textColor="@color/text_dark"
+                    android:textSize="13sp"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/btnLogin"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/bg_button_peach"
+                android:text="Log In"
+                android:textAllCaps="false"
+                android:textColor="@color/text_dark"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <ProgressBar
+                android:id="@+id/loginProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="12dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btnGoogleSignIn"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_button_outline"
+                android:text="Sign in with Google"
+                android:textAllCaps="false"
+                android:textColor="@color/text_dark"
+                android:textSize="15sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="28dp"
+                android:background="@color/divider_gray" />
+
+            <TextView
+                android:id="@+id/tvGoToSignup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:text="New to Nocturne? Sign Up"
+                android:textColor="@color/text_dark"
+                android:textSize="14sp"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

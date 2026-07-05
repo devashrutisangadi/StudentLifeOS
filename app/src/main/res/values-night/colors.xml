@@ -8,4 +8,5 @@
     <color name="button_peach">#D9A9A2</color>
     <color name="button_outline">#B49CE8</color>
     <color name="divider_gray">#3A3560</color>
+    <color name="checkbox_tint">#B49CE8</color>
 </resources>
