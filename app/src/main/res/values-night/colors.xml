@@ -8,5 +8,18 @@
     <color name="button_peach">#D9A9A2</color>
     <color name="button_outline">#B49CE8</color>
     <color name="divider_gray">#3A3560</color>
-    <color name="checkbox_tint">#B49CE8</color>
+
+
+    <!-- Nocturne Dashboard Colors (Dark) -->
+    <color name="gradient_purple">#6B5FC2</color>
+    <color name="gradient_pink">#C98CAE</color>
+    <color name="dashboard_bg">#15141B</color>
+    <color name="card_white">#232230</color>
+    <color name="text_charcoal">#F2F0F7</color>
+    <color name="text_gray">#A9A3B8</color>
+    <color name="purple_accent">#9B8FEA</color>
+    <color name="timeline_line">#3A3850</color>
+    <color name="quick_access_bg">#2A2838</color>
+
+
 </resources>

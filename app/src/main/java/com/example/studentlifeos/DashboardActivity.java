@@ -1,14 +1,12 @@
 package com.example.studentlifeos;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class DashboardActivity extends AppCompatActivity {
 
@@ -17,21 +15,34 @@ public class DashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
 
-        TextView tvWelcome = findViewById(R.id.tvWelcome);
-        TextView tvEmail = findViewById(R.id.tvEmail);
-
-        if (user != null) {
-            String name = user.getDisplayName();
-            tvWelcome.setText(name != null && !name.isEmpty() ? "Welcome, " + name + "!" : "Welcome!");
-            tvEmail.setText(user.getEmail());
+        if (savedInstanceState == null) {
+            loadFragment(new HomeFragment());
         }
 
-        findViewById(R.id.btnLogout).setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_home) {
+                loadFragment(new HomeFragment());
+                return true;
+            } else if (id == R.id.nav_profile) {
+                loadFragment(new ProfileFragment());
+                return true;
+            } else if (id == R.id.nav_notes) {
+                // TODO: replace with your Notes Repo fragment
+                return true;
+            } else if (id == R.id.nav_papers) {
+                // TODO: replace with your PYQ Papers fragment
+                return true;
+            }
+            return false;
         });
+    }
+
+    private void loadFragment(Fragment fragment) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragmentContainer, fragment);
+        transaction.commit();
     }
 }

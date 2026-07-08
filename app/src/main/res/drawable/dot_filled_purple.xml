@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/purple_accent"/>
+            <size android:width="18dp" android:height="18dp"/>
+        </shape>
+    </item>
+    <item android:width="10dp" android:height="10dp" android:gravity="center">
+        <shape android:shape="oval">
+            <solid android:color="@color/card_white"/>
+        </shape>
+    </item>
+    <item android:width="6dp" android:height="6dp" android:gravity="center">
+        <shape android:shape="oval">
+            <solid android:color="@color/purple_accent"/>
+        </shape>
+    </item>
+</layer-list>
