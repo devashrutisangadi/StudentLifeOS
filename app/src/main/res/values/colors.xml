@@ -182,4 +182,8 @@
 
     <color name="checkbox_tint">#9B7FE0</color>
 
+    <color name="profile_header_purple">#8B6FE0</color>
+    <color name="avatar_initials_text">#4A1B0C</color>
+    <color name="danger_text">#A32D2D</color>
+    <color name="danger_border">#E24B4A</color>
 </resources>
