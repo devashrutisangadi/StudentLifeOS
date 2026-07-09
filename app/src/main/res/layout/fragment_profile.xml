@@ -59,7 +59,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- White card -->
+        <!-- White/dark card -->
         <androidx.cardview.widget.CardView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -144,38 +144,80 @@
                     android:background="@color/divider_gray"
                     android:layout_marginBottom="12dp" />
 
-                <!-- Contact rows -->
-                <TextView
-                    android:id="@+id/tvEmail"
+                <!-- Contact rows, now with icons -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:drawablePadding="10dp"
+                    android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:text="—"
-                    android:textColor="@color/text_dark"
-                    android:textSize="13sp" />
+                    android:layout_marginBottom="12dp">
 
-                <TextView
-                    android:id="@+id/tvPhone"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:drawablePadding="10dp"
-                    android:gravity="center_vertical"
-                    android:text="—"
-                    android:textColor="@color/text_dark"
-                    android:textSize="13sp" />
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_email"
+                        app:tint="@color/hint_gray"
+                        android:contentDescription="Email" />
 
-                <TextView
-                    android:id="@+id/tvUniversity"
+                    <TextView
+                        android:id="@+id/tvEmail"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:text="—"
+                        android:textColor="@color/text_dark"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:drawablePadding="10dp"
+                    android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:text="—"
-                    android:textColor="@color/text_dark"
-                    android:textSize="13sp" />
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_phone"
+                        app:tint="@color/hint_gray"
+                        android:contentDescription="Phone" />
+
+                    <TextView
+                        android:id="@+id/tvPhone"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:text="—"
+                        android:textColor="@color/text_dark"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_institute"
+                        app:tint="@color/hint_gray"
+                        android:contentDescription="Institute" />
+
+                    <TextView
+                        android:id="@+id/tvUniversity"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:text="—"
+                        android:textColor="@color/text_dark"
+                        android:textSize="13sp" />
+                </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
@@ -183,17 +225,25 @@
                     android:layout_marginVertical="12dp"
                     android:background="@color/divider_gray" />
 
-                <!-- Dark mode row -->
+                <!-- Dark mode row, now with icon -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_dark_mode"
+                        app:tint="@color/hint_gray"
+                        android:contentDescription="Dark mode" />
+
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:layout_marginStart="10dp"
                         android:text="Dark mode"
                         android:textColor="@color/text_dark"
                         android:textSize="13sp" />

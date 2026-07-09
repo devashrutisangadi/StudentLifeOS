@@ -32,26 +32,7 @@ public class ProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        TextView tvName = view.findViewById(R.id.tvName);
-        TextView tvBranchSem = view.findViewById(R.id.tvBranchSem);
-        TextView tvAvatarInitials = view.findViewById(R.id.tvAvatarInitials);
-        TextView tvRollNumber = view.findViewById(R.id.tvRollNumber);
-        TextView tvCgpa = view.findViewById(R.id.tvCgpa);
-        TextView tvEmail = view.findViewById(R.id.tvEmail);
-        TextView tvPhone = view.findViewById(R.id.tvPhone);
-        TextView tvUniversity = view.findViewById(R.id.tvUniversity);
         SwitchMaterial switchDarkMode = view.findViewById(R.id.switchDarkMode);
-
-        // --- Load profile data from Firestore ---
-        String uid = FirebaseAuth.getInstance().getCurrentUser() != null
-                ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
-
-        if (uid != null) {
-            FirebaseFirestore.getInstance().collection("users").document(uid).get()
-                    .addOnSuccessListener(this::bindProfile)
-                    .addOnFailureListener(e ->
-                            Toast.makeText(getContext(), "Couldn't load profile", Toast.LENGTH_SHORT).show());
-        }
 
         // --- Dark mode toggle ---
         SharedPreferences prefs = requireContext()
@@ -64,7 +45,6 @@ public class ProfileFragment extends Fragment {
             AppCompatDelegate.setDefaultNightMode(
                     isChecked ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
             );
-            // Recreating the Activity applies the theme change immediately
             if (getActivity() != null) {
                 getActivity().recreate();
             }
@@ -72,8 +52,7 @@ public class ProfileFragment extends Fragment {
 
         // --- Buttons ---
         view.findViewById(R.id.btnEditProfile).setOnClickListener(v ->
-                        Toast.makeText(getContext(), "Edit profile screen coming soon", Toast.LENGTH_SHORT).show()
-                // TODO: replace with startActivity(new Intent(getContext(), EditProfileActivity.class))
+                startActivity(new Intent(getContext(), EditProfileActivity.class))
         );
 
         view.findViewById(R.id.btnLogout).setOnClickListener(v -> {
@@ -85,6 +64,26 @@ public class ProfileFragment extends Fragment {
                 getActivity().finish();
             }
         });
+
+        loadProfile();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadProfile();
+    }
+
+    private void loadProfile() {
+        String uid = FirebaseAuth.getInstance().getCurrentUser() != null
+                ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+
+        if (uid == null) return;
+
+        FirebaseFirestore.getInstance().collection("users").document(uid).get()
+                .addOnSuccessListener(this::bindProfile)
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Couldn't load profile", Toast.LENGTH_SHORT).show());
     }
 
     private void bindProfile(DocumentSnapshot doc) {
@@ -95,7 +94,11 @@ public class ProfileFragment extends Fragment {
         Long semester = doc.getLong("semester");
         String rollNumber = doc.getString("rollNumber");
         Double cgpa = doc.getDouble("cgpa");
+
         String email = doc.getString("email");
+        if (email == null && FirebaseAuth.getInstance().getCurrentUser() != null) {
+            email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        }
         String contact = doc.getString("contact");
         String university = doc.getString("university");
 
@@ -114,7 +117,6 @@ public class ProfileFragment extends Fragment {
         ((TextView) getView().findViewById(R.id.tvUniversity))
                 .setText(university != null ? university : "—");
 
-        // Avatar initials from name
         if (name != null && !name.trim().isEmpty()) {
             String[] parts = name.trim().split("\\s+");
             String initials = parts.length > 1
