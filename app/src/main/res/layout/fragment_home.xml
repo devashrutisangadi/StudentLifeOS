@@ -139,7 +139,7 @@
                     android:id="@+id/tvAttendanceValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="92%"
+                    android:text="-"
                     android:textColor="@color/text_charcoal"
                     android:textSize="20sp"
                     android:textStyle="bold"/>
@@ -176,7 +176,7 @@
                     android:id="@+id/tvCreditsValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="18"
+                    android:text="-"
                     android:textColor="@color/text_charcoal"
                     android:textSize="20sp"
                     android:textStyle="bold"/>
