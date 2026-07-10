@@ -32,7 +32,7 @@
                     android:id="@+id/tvSemester"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Semester 5"
+                    android:text="-"
                     android:textColor="#E8E4F7"
                     android:textSize="14sp"/>
 
@@ -41,7 +41,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Hi, Carlitos"
+                    android:text="Welcome!"
                     android:textColor="#F3F1FA"
                     android:textSize="15sp"/>
 
