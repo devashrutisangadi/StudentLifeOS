@@ -82,7 +82,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         // Back button -> just leave this screen (returns to Welcome)
-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        findViewById(R.id.btnBack).setOnClickListener(v -> startActivity(new Intent(this, WelcomeActivity.class)));
 
         // Password show/hide toggle
         ivTogglePassword.setOnClickListener(v -> {
