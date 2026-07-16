@@ -54,37 +54,50 @@ public class EditProfileActivity extends AppCompatActivity {
 
         etName.setText(user.getDisplayName());
 
-        db.collection("users").document(user.getUid()).get()
+        db.collection("students").document(user.getUid()).get()
                 .addOnSuccessListener(this::bindExistingValues)
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Couldn't load existing profile", Toast.LENGTH_SHORT).show());
     }
 
+    @SuppressWarnings("unchecked")
     private void bindExistingValues(DocumentSnapshot doc) {
         if (doc == null || !doc.exists()) return;
 
-        if (TextUtils.isEmpty(etName.getText())) {
-            String name = doc.getString("displayName");
-            if (name != null) etName.setText(name);
+        Map<String, Object> personal = (Map<String, Object>) doc.get("personal");
+        Map<String, Object> academic = (Map<String, Object>) doc.get("academic");
+        Map<String, Object> metrics = (Map<String, Object>) doc.get("metrics");
+
+        if (TextUtils.isEmpty(etName.getText()) && personal != null) {
+            String first = personal.get("firstName") != null ? personal.get("firstName").toString() : "";
+            String last = personal.get("lastName") != null ? personal.get("lastName").toString() : "";
+            String fullName = (first + " " + last).trim();
+            if (!fullName.isEmpty()) etName.setText(fullName);
         }
 
-        String branch = doc.getString("branch");
-        if (branch != null) etBranch.setText(branch);
+        if (academic != null) {
+            Object branch = academic.get("branch");
+            if (branch != null) etBranch.setText(branch.toString());
 
-        Long semester = doc.getLong("semester");
-        if (semester != null) etSemester.setText(String.valueOf(semester));
+            Object semester = academic.get("semester");
+            if (semester != null) etSemester.setText(String.valueOf(semester));
 
-        String rollNumber = doc.getString("rollNumber");
-        if (rollNumber != null) etRollNumber.setText(rollNumber);
+            Object rollNumber = academic.get("rollNumber");
+            if (rollNumber != null) etRollNumber.setText(rollNumber.toString());
 
-        Double cgpa = doc.getDouble("cgpa");
-        if (cgpa != null) etCgpa.setText(String.valueOf(cgpa));
+            Object university = academic.get("university");
+            if (university != null) etUniversity.setText(university.toString());
+        }
 
-        String contact = doc.getString("contact");
-        if (contact != null) etContact.setText(contact);
+        if (metrics != null) {
+            Object cgpa = metrics.get("cpi");
+            if (cgpa != null) etCgpa.setText(String.valueOf(cgpa));
+        }
 
-        String university = doc.getString("university");
-        if (university != null) etUniversity.setText(university);
+        if (personal != null) {
+            Object contact = personal.get("phone");
+            if (contact != null) etContact.setText(contact.toString());
+        }
     }
 
     private void saveProfile() {
@@ -107,16 +120,24 @@ public class EditProfileActivity extends AppCompatActivity {
                 .build();
         user.updateProfile(request);
 
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("displayName", name);
-        updates.put("branch", etBranch.getText().toString().trim());
-        updates.put("semester", semester);
-        updates.put("rollNumber", etRollNumber.getText().toString().trim());
-        updates.put("cgpa", cgpa);
-        updates.put("contact", etContact.getText().toString().trim());
-        updates.put("university", etUniversity.getText().toString().trim());
+        String[] nameParts = name.split("\\s+", 2);
+        String firstName = nameParts.length > 0 ? nameParts[0] : "";
+        String lastName = nameParts.length > 1 ? nameParts[1] : "";
 
-        db.collection("users").document(user.getUid())
+        // Dot-path keys so this only touches the fields this form edits,
+        // leaving college/degree/dob/bloodGroup/enrollmentNumber etc. (and
+        // metrics like spiHistory/backlogs/overallAttendance) untouched.
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("personal.firstName", firstName);
+        updates.put("personal.lastName", lastName);
+        updates.put("personal.phone", etContact.getText().toString().trim());
+        updates.put("academic.branch", etBranch.getText().toString().trim());
+        updates.put("academic.semester", semester);
+        updates.put("academic.rollNumber", etRollNumber.getText().toString().trim());
+        updates.put("academic.university", etUniversity.getText().toString().trim());
+        updates.put("metrics.cpi", cgpa);
+
+        db.collection("students").document(user.getUid())
                 .set(updates, com.google.firebase.firestore.SetOptions.merge())
                 .addOnSuccessListener(unused -> {
                     setLoading(false);

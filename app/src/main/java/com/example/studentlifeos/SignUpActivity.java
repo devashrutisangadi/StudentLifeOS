@@ -3,12 +3,9 @@ package com.example.studentlifeos;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-import android.text.InputType;
-import android.widget.ImageView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -26,6 +23,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,27 +62,12 @@ public class SignUpActivity extends AppCompatActivity {
         EditText etPassword = findViewById(R.id.etPassword);
         ProgressBar progress = findViewById(R.id.signupProgress);
 
-        ImageView ivTogglePassword = findViewById(R.id.ivTogglePassword);
-        final boolean[] isPasswordVisible = {false};
-
-        ivTogglePassword.setOnClickListener(v -> {
-            isPasswordVisible[0] = !isPasswordVisible[0];
-            if (isPasswordVisible[0]) {
-                etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                ivTogglePassword.setImageResource(R.drawable.ic_eye_open);
-            } else {
-                etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                ivTogglePassword.setImageResource(R.drawable.ic_eye_closed);
-            }
-            etPassword.setSelection(etPassword.getText().length());
-        });
-
         findViewById(R.id.btnSignUp).setOnClickListener(v -> {
-            String name = etName.getText().toString().trim();
+            String fullName = etName.getText().toString().trim();
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
-            if (name.isEmpty() || email.isEmpty() || password.length() < 6) {
+            if (fullName.isEmpty() || email.isEmpty() || password.length() < 6) {
                 Toast.makeText(this, "Fill all fields (password min 6 chars)", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -94,21 +77,11 @@ public class SignUpActivity extends AppCompatActivity {
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             String uid = auth.getCurrentUser().getUid();
-                            Map<String, Object> profile = new HashMap<>();
-                            profile.put("uid", uid);
-                            profile.put("displayName", name);
-                            profile.put("email", email);
-                            profile.put("role", "student");
-
-                            FirebaseFirestore.getInstance()
-                                    .collection("users")
-                                    .document(uid)
-                                    .set(profile)
-                                    .addOnCompleteListener(t -> {
-                                        progress.setVisibility(View.GONE);
-                                        startActivity(new Intent(this, DashboardActivity.class));
-                                        finish();
-                                    });
+                            createStudentDocument(uid, fullName, email, () -> {
+                                progress.setVisibility(View.GONE);
+                                startActivity(new Intent(this, DashboardActivity.class));
+                                finish();
+                            });
                         } else {
                             progress.setVisibility(View.GONE);
                             String msg = task.getException() != null
@@ -134,28 +107,82 @@ public class SignUpActivity extends AppCompatActivity {
         auth.signInWithCredential(credential).addOnCompleteListener(authTask -> {
             if (authTask.isSuccessful()) {
                 FirebaseUser user = auth.getCurrentUser();
-                FirebaseFirestore.getInstance()
-                        .collection("users")
-                        .document(user.getUid())
-                        .get()
+                String uid = user.getUid();
+                String name = user.getDisplayName() != null ? user.getDisplayName() : "";
+                String email = user.getEmail() != null ? user.getEmail() : "";
+
+                FirebaseFirestore.getInstance().collection("students").document(uid).get()
                         .addOnSuccessListener(snapshot -> {
                             if (!snapshot.exists()) {
-                                Map<String, Object> profile = new HashMap<>();
-                                profile.put("uid", user.getUid());
-                                profile.put("displayName", user.getDisplayName() != null ? user.getDisplayName() : "");
-                                profile.put("email", user.getEmail() != null ? user.getEmail() : "");
-                                profile.put("role", "student");
-                                FirebaseFirestore.getInstance()
-                                        .collection("users")
-                                        .document(user.getUid())
-                                        .set(profile);
+                                createStudentDocument(uid, name, email, () -> {
+                                    startActivity(new Intent(this, DashboardActivity.class));
+                                    finish();
+                                });
+                            } else {
+                                startActivity(new Intent(this, DashboardActivity.class));
+                                finish();
                             }
                         });
-                startActivity(new Intent(this, DashboardActivity.class));
-                finish();
             } else {
                 Toast.makeText(this, "Google sign-up failed", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    /**
+     * Creates a students/{uid} document matching the new dataset's nested
+     * shape (personal/academic/metrics), with sensible empty/zero defaults
+     * for fields the sign-up form doesn't collect yet (roll number, CGPA,
+     * attendance, etc. — those need a proper "complete your profile" or
+     * admin-entry flow later).
+     */
+    private void createStudentDocument(String uid, String fullName, String email, Runnable onComplete) {
+        String[] nameParts = fullName.trim().split("\\s+", 2);
+        String firstName = nameParts.length > 0 ? nameParts[0] : "";
+        String lastName = nameParts.length > 1 ? nameParts[1] : "";
+
+        Map<String, Object> personal = new HashMap<>();
+        personal.put("firstName", firstName);
+        personal.put("lastName", lastName);
+        personal.put("phone", "");
+        personal.put("dob", "");
+        personal.put("bloodGroup", "");
+        personal.put("avatarUrl", "");
+
+        Map<String, Object> academic = new HashMap<>();
+        academic.put("university", "");
+        academic.put("college", "");
+        academic.put("degree", "");
+        academic.put("branch", "");
+        academic.put("semester", 1);
+        academic.put("rollNumber", "");
+        academic.put("enrollmentNumber", "");
+
+        Map<String, Object> metrics = new HashMap<>();
+        metrics.put("cpi", 0.0);
+        metrics.put("spiHistory", new ArrayList<Double>());
+        metrics.put("totalCreditsEarned", 0);
+        metrics.put("backlogs", 0);
+        metrics.put("overallAttendance", 0.0);
+
+        Map<String, Object> student = new HashMap<>();
+        student.put("personal", personal);
+        student.put("academic", academic);
+        student.put("metrics", metrics);
+        // email is stored one level up for easy lookup/rules use, matching
+        // where your Auth account's email lives — not nested, unlike the
+        // synthetic dataset's login_credentials (which we deliberately don't
+        // replicate, since credentials belong in Auth, not Firestore).
+        student.put("email", email);
+
+        FirebaseFirestore.getInstance().collection("students").document(uid)
+                .set(student)
+                .addOnSuccessListener(unused -> onComplete.run())
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Couldn't create profile: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    // Still proceed rather than stranding the user on a blank screen —
+                    // but now you'll actually SEE why it failed, via the Toast above.
+                    onComplete.run();
+                });
     }
 }

@@ -15,10 +15,10 @@ import androidx.fragment.app.Fragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class HomeFragment extends Fragment {
 
@@ -46,10 +46,10 @@ public class HomeFragment extends Fragment {
         rootView = inflater.inflate(R.layout.fragment_home, container, false);
         timelineContainer = rootView.findViewById(R.id.timelineContainer);
 
-        loadProfileHeader();
-        loadCreditsTotal();
+        loadStudentData();
 
-        // TODO: replace this static list with real timetable data from Firestore later
+        // TODO: replace this static list with real timetable data once that
+        // feature/collection exists — the current dataset has no schedule.
         List<ClassItem> classes = new ArrayList<>();
         classes.add(new ClassItem("9:00 - 10:00 AM", "Data Structures", "Prof. Name · Room", true, false));
         classes.add(new ClassItem("11:00 - 12:00 AM", "Data Structure", "Prof. Name · Room", false, false));
@@ -57,119 +57,73 @@ public class HomeFragment extends Fragment {
         classes.add(new ClassItem("11:00 - 12:00 PM", "DBMS Lab", "Prof. Name · Room", false, false));
 
         for (int i = 0; i < classes.size(); i++) {
-            boolean isLast = (i == classes.size() - 1);
-            addTimelineRow(classes.get(i), isLast);
+            addTimelineRow(classes.get(i), i == classes.size() - 1);
         }
 
-        TextView tvSeeAll = rootView.findViewById(R.id.tvSeeAll);
-        tvSeeAll.setOnClickListener(v ->
+        rootView.findViewById(R.id.tvSeeAll).setOnClickListener(v ->
                 Toast.makeText(getContext(), "See all classes - hook this up later", Toast.LENGTH_SHORT).show());
 
-        LinearLayout cardNotesRepo = rootView.findViewById(R.id.cardNotesRepo);
-        cardNotesRepo.setOnClickListener(v ->
+        rootView.findViewById(R.id.cardNotesRepo).setOnClickListener(v ->
                 Toast.makeText(getContext(), "Open Notes Repo", Toast.LENGTH_SHORT).show());
 
-        LinearLayout cardPyqPapers = rootView.findViewById(R.id.cardPyqPapers);
-        cardPyqPapers.setOnClickListener(v ->
+        rootView.findViewById(R.id.cardPyqPapers).setOnClickListener(v ->
                 Toast.makeText(getContext(), "Open PYQ Papers", Toast.LENGTH_SHORT).show());
 
         return rootView;
     }
 
-    /** Pulls displayName, semester, and cgpa from the signed-in user's Firestore doc. */
-    private void loadProfileHeader() {
+    /** Pulls personal/academic/metrics straight from students/{uid} — no more
+     *  fan-out through enrollments+subjects needed; totalCreditsEarned and
+     *  overallAttendance are now real, direct fields. */
+    private void loadStudentData() {
         String uid = FirebaseAuth.getInstance().getCurrentUser() != null
                 ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
         if (uid == null || rootView == null) return;
 
-        FirebaseFirestore.getInstance().collection("users").document(uid).get()
-                .addOnSuccessListener(this::bindProfileHeader)
+        FirebaseFirestore.getInstance().collection("students").document(uid).get()
+                .addOnSuccessListener(this::bindStudentData)
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Couldn't load dashboard data", Toast.LENGTH_SHORT).show());
     }
 
-    private void bindProfileHeader(DocumentSnapshot doc) {
+    @SuppressWarnings("unchecked")
+    private void bindStudentData(DocumentSnapshot doc) {
         if (!isAdded() || rootView == null) return;
 
-        String name = doc.getString("displayName");
-        Long semester = doc.getLong("semester");
-        Double cgpa = doc.getDouble("cgpa");
+        Map<String, Object> personal = (Map<String, Object>) doc.get("personal");
+        Map<String, Object> academic = (Map<String, Object>) doc.get("academic");
+        Map<String, Object> metrics = (Map<String, Object>) doc.get("metrics");
 
         TextView tvGreeting = rootView.findViewById(R.id.tvGreeting);
         TextView tvSemester = rootView.findViewById(R.id.tvSemester);
         TextView tvCgpaValue = rootView.findViewById(R.id.tvCgpaValue);
+        TextView tvAttendanceValue = rootView.findViewById(R.id.tvAttendanceValue);
+        TextView tvCreditsValue = rootView.findViewById(R.id.tvCreditsValue);
         TextView tvAvatarInitials = rootView.findViewById(R.id.tvAvatarInitials);
 
-        // First name only for the greeting, to match "Hi, Carlitos" style
-        String firstName = (name != null && !name.trim().isEmpty())
-                ? name.trim().split("\\s+")[0] : "there";
+        String firstName = personal != null && personal.get("firstName") != null
+                ? personal.get("firstName").toString() : "there";
         tvGreeting.setText("Hi, " + firstName);
 
+        Object semester = academic != null ? academic.get("semester") : null;
         tvSemester.setText(semester != null ? ("Semester " + semester) : "—");
-        tvCgpaValue.setText(cgpa != null ? String.valueOf(cgpa) : "—");
 
-        if (name != null && !name.trim().isEmpty()) {
-            String[] parts = name.trim().split("\\s+");
-            String initials = parts.length > 1
-                    ? ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
-                    : parts[0].substring(0, Math.min(2, parts[0].length())).toUpperCase();
-            tvAvatarInitials.setText(initials);
+        Object cpi = metrics != null ? metrics.get("cpi") : null;
+        tvCgpaValue.setText(cpi != null ? String.valueOf(cpi) : "—");
+
+        Object attendance = metrics != null ? metrics.get("overallAttendance") : null;
+        tvAttendanceValue.setText(attendance != null ? (attendance + "%") : "—");
+
+        Object credits = metrics != null ? metrics.get("totalCreditsEarned") : null;
+        tvCreditsValue.setText(credits != null ? String.valueOf(credits) : "—");
+
+        if (personal != null && personal.get("firstName") != null) {
+            String first = personal.get("firstName").toString();
+            String last = personal.get("lastName") != null ? personal.get("lastName").toString() : "";
+            String initials = (first.isEmpty() ? "" : first.charAt(0) + "")
+                    + (last.isEmpty() ? "" : last.charAt(0) + "");
+            tvAvatarInitials.setText(initials.isEmpty() ? "?" : initials.toUpperCase());
         }
-    }
-
-    /**
-     * Sums the `credits` field across every subject this student is enrolled in.
-     * NOTE: Attendance has no equivalent — there is no attendance-tracking
-     * collection in the current data model, so tvAttendanceValue is left as "—"
-     * until that feature exists.
-     */
-    private void loadCreditsTotal() {
-        String uid = FirebaseAuth.getInstance().getCurrentUser() != null
-                ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
-        if (uid == null || rootView == null) return;
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        db.collection("enrollments")
-                .whereEqualTo("studentUid", uid)
-                .get()
-                .addOnSuccessListener(enrollmentDocs -> {
-                    List<String> subjectIds = new ArrayList<>();
-                    for (QueryDocumentSnapshot doc : enrollmentDocs) {
-                        String subjectId = doc.getString("subjectId");
-                        if (subjectId != null) subjectIds.add(subjectId);
-                    }
-
-                    if (subjectIds.isEmpty()) {
-                        setCreditsText(0);
-                        return;
-                    }
-
-                    final int[] creditsSum = {0};
-                    final int[] remaining = {subjectIds.size()};
-
-                    for (String subjectId : subjectIds) {
-                        db.collection("subjects").document(subjectId).get()
-                                .addOnSuccessListener(subjectDoc -> {
-                                    Long credits = subjectDoc.getLong("credits");
-                                    if (credits != null) creditsSum[0] += credits;
-                                    remaining[0]--;
-                                    if (remaining[0] == 0) setCreditsText(creditsSum[0]);
-                                })
-                                .addOnFailureListener(e -> {
-                                    remaining[0]--;
-                                    if (remaining[0] == 0) setCreditsText(creditsSum[0]);
-                                });
-                    }
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(getContext(), "Couldn't load credits", Toast.LENGTH_SHORT).show());
-    }
-
-    private void setCreditsText(int total) {
-        if (!isAdded() || rootView == null) return;
-        TextView tvCreditsValue = rootView.findViewById(R.id.tvCreditsValue);
-        tvCreditsValue.setText(String.valueOf(total));
     }
 
     private void addTimelineRow(ClassItem item, boolean isLast) {
