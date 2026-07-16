@@ -28,6 +28,7 @@
         <activity android:name=".DashboardActivity" android:exported="false" />
         <activity android:name=".WelcomeActivity" android:exported="false" />
         <activity android:name=".EditProfileActivity" android:exported="false" />
+        <activity android:name=".SyllabusTrackerActivity" android:exported="false" />
 
     </application>
 

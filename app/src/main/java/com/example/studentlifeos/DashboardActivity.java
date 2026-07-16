@@ -29,8 +29,8 @@ public class DashboardActivity extends AppCompatActivity {
             } else if (id == R.id.nav_profile) {
                 loadFragment(new ProfileFragment());
                 return true;
-            } else if (id == R.id.nav_notes) {
-                // TODO: replace with your Notes Repo fragment
+            } else if (id == R.id.nav_subjects) {
+                loadFragment(new SubjectsFragment());
                 return true;
             } else if (id == R.id.nav_papers) {
                 // TODO: replace with your PYQ Papers fragment

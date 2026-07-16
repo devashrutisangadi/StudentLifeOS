@@ -102,7 +102,7 @@
                     android:id="@+id/tvCgpaValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="8.4"
+                    android:text="-"
                     android:textColor="@color/text_charcoal"
                     android:textSize="20sp"
                     android:textStyle="bold"/>
@@ -309,6 +309,55 @@
                     android:textStyle="bold"
                     android:textSize="14sp"/>
             </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Row 2: new Subjects card, same width as one grid cell -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/cardSubjects"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_quick_access_card"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_subjects"
+                    app:tint="@color/purple_accent"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Subjects"
+                    android:textColor="@color/text_charcoal"
+                    android:textStyle="bold"
+                    android:textSize="14sp"/>
+            </LinearLayout>
+
+            <!-- Empty spacer, keeps Subjects card the same width as the row above -->
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"/>
+
         </LinearLayout>
 
     </LinearLayout>

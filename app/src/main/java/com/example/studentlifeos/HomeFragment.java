@@ -63,8 +63,9 @@ public class HomeFragment extends Fragment {
         rootView.findViewById(R.id.tvSeeAll).setOnClickListener(v ->
                 Toast.makeText(getContext(), "See all classes - hook this up later", Toast.LENGTH_SHORT).show());
 
-        rootView.findViewById(R.id.cardNotesRepo).setOnClickListener(v ->
-                Toast.makeText(getContext(), "Open Notes Repo", Toast.LENGTH_SHORT).show());
+        rootView.findViewById(R.id.cardSubjects).setOnClickListener(v ->
+                startActivity(new android.content.Intent(getContext(), SubjectsFragment.class))
+        );
 
         rootView.findViewById(R.id.cardPyqPapers).setOnClickListener(v ->
                 Toast.makeText(getContext(), "Open PYQ Papers", Toast.LENGTH_SHORT).show());
