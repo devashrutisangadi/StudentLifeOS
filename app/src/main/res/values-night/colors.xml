@@ -27,20 +27,4 @@
     <color name="danger_border">#E24B4A</color>
 
 
-    <!-- Subjects page-->
-    <color name="subjects_bg_center">#15141B</color>
-    <color name="subjects_bg_edge">#15141B</color>
-
-    <color name="subject_card_bg">#1D1A28</color>
-    <color name="subject_card_border">#2E2A40</color>
-
-    <color name="subject_icon_bg_1">#2C2750</color>
-    <color name="subject_icon_bg_2">#3A2733</color>
-    <color name="subject_icon_bg_3">#1C332C</color>
-
-    <color name="chip_selected_bg">#AFA9EC</color>
-    <color name="chip_unselected_bg">#221D2E</color>
-    <color name="chip_selected_text">#26215C</color>
-    <color name="chip_unselected_text">#B4B2A9</color>
-
 </resources>
