@@ -26,5 +26,10 @@
     <color name="danger_text">#F09595</color>
     <color name="danger_border">#E24B4A</color>
 
+    <!--notification color-->
+    <color name="notification_text_color">#EDEAF5</color>
+    <color name="notification_meta_color">#9990B0</color>
 
+    <!-- -->
+    <color name="subject_secondary_text">#EDEAF5</color>
 </resources>

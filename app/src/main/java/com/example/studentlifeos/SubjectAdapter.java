@@ -1,8 +1,12 @@
 package com.example.studentlifeos;
 
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -47,15 +51,45 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
         Subject subject = subjects.get(position);
         holder.tvName.setText(subject.name != null ? subject.name : "Untitled subject");
         holder.tvFaculty.setText(subject.faculty != null ? subject.faculty : "—");
-        holder.tvProgress.setText(subject.progress + "%");
-
-        String initials = subject.code != null && subject.code.length() >= 2
-                ? subject.code.substring(0, 2).toUpperCase()
-                : (subject.name != null && subject.name.length() >= 2
-                ? subject.name.substring(0, 2).toUpperCase() : "SU");
-        holder.tvBadge.setText(initials);
 
         holder.itemView.setOnClickListener(v -> listener.onSubjectClick(subject));
+
+        // Icon mapping (placeholder, keyword-based)
+        String name = subject.name != null ? subject.name.toLowerCase() : "";
+        int iconRes;
+        if (name.contains("java")) {
+            iconRes = R.drawable.ic_subject_java;
+        } else if (name.contains("data structures")) {
+            iconRes = R.drawable.ic_subject_cube;
+        } else if (name.contains("digital systems")) {
+            iconRes = R.drawable.ic_subject_logic;
+        } else if (name.contains("discrete")) {
+            iconRes = R.drawable.ic_subject_network;
+        } else {
+            iconRes = R.drawable.ic_subject_generic;
+        }
+        holder.ivSubjectIcon.setImageResource(iconRes);
+
+        // Progress bar + tier color
+        int progress = subject.progress;
+        holder.progressSubject.setProgress(progress);
+
+        int fillColor;
+        if (progress < 40) {
+            fillColor = Color.parseColor("#E57373");
+        } else if (progress < 75) {
+            fillColor = Color.parseColor("#F0C05A");
+        } else {
+            fillColor = Color.parseColor("#7FD99D");
+        }
+        android.graphics.drawable.LayerDrawable layerDrawable =
+                (android.graphics.drawable.LayerDrawable) holder.progressSubject.getProgressDrawable().mutate();
+        android.graphics.drawable.Drawable progressLayer =
+                layerDrawable.findDrawableByLayerId(android.R.id.progress);
+        if (progressLayer != null) {
+            progressLayer.setColorFilter(fillColor, PorterDuff.Mode.SRC_IN);
+        }
+        holder.tvProgress.setText(progress + "%");
     }
 
     @Override
@@ -64,11 +98,14 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvBadge, tvName, tvFaculty, tvProgress;
+        ImageView ivSubjectIcon;
+        ProgressBar progressSubject;
+        TextView tvName, tvFaculty, tvProgress;
 
         ViewHolder(View itemView) {
             super(itemView);
-            tvBadge = itemView.findViewById(R.id.tvSubjectBadge);
+            ivSubjectIcon = itemView.findViewById(R.id.ivSubjectIcon);
+            progressSubject = itemView.findViewById(R.id.progressSubject);
             tvName = itemView.findViewById(R.id.tvSubjectName);
             tvFaculty = itemView.findViewById(R.id.tvSubjectFaculty);
             tvProgress = itemView.findViewById(R.id.tvSubjectProgress);

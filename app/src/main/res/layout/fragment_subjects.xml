@@ -1,7 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/recyclerSubjects"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:clipToPadding="false" />
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header: title + profile + bell -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:id="@+id/tvSubjectsTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Subjects"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/ivProfile"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_profile"
+                android:contentDescription="Profile" />
+
+            <ImageView
+                android:id="@+id/ivNotifications"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_bell"
+                android:contentDescription="Notifications" />
+
+        </LinearLayout>
+
+        <!-- Search bar -->
+        <EditText
+            android:id="@+id/etSearchSubject"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Search for a subject..."
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:drawableStart="@drawable/ic_search"
+            android:drawablePadding="10dp"
+            android:background="@drawable/bg_search_bar"
+            android:inputType="text"
+            android:textColorHint="@color/subject_secondary_text"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Subjects list -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerSubjects"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:clipToPadding="false" />
+
+        <!-- Empty state: shown when search has no matches -->
+        <TextView
+            android:id="@+id/tvNoResults"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="This subject doesn't exist"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:paddingTop="24dp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>
