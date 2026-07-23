@@ -63,13 +63,21 @@ public class HomeFragment extends Fragment {
         rootView.findViewById(R.id.tvSeeAll).setOnClickListener(v ->
                 Toast.makeText(getContext(), "See all classes - hook this up later", Toast.LENGTH_SHORT).show());
 
-        rootView.findViewById(R.id.cardSubjects).setOnClickListener(v ->
-                startActivity(new android.content.Intent(getContext(), SubjectsFragment.class))
-        );
+        rootView.findViewById(R.id.cardSubjects).setOnClickListener(v -> {
+            if (getActivity() != null) {
+                com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
+                        getActivity().findViewById(R.id.bottomNav);
+                bottomNav.setSelectedItemId(R.id.nav_subjects);
+            }
+        });
 
-        rootView.findViewById(R.id.cardPyqPapers).setOnClickListener(v ->
-                startActivity(new android.content.Intent(getContext(), PapersFragment.class)));
-
+        rootView.findViewById(R.id.cardPyqPapers).setOnClickListener(v -> {
+            if (getActivity() != null) {
+                com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
+                        getActivity().findViewById(R.id.bottomNav);
+                bottomNav.setSelectedItemId(R.id.nav_papers);
+            }
+        });
         rootView.findViewById(R.id.cardNotesRepo).setOnClickListener(v -> {
             if (getActivity() != null) {
                 com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
