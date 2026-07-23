@@ -30,6 +30,8 @@
         <activity android:name=".EditProfileActivity" android:exported="false" />
         <activity android:name=".SyllabusTrackerActivity" android:exported="false" />
         <activity android:name=".NotificationsActivity" />
+        <activity android:name=".NotesActivity" android:exported="false" />
+        <activity android:name=".PapersListActivity" android:exported="false" />
 
     </application>
 

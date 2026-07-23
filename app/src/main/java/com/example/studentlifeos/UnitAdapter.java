@@ -17,17 +17,23 @@ public class UnitAdapter extends RecyclerView.Adapter<UnitAdapter.ViewHolder> {
         void onUnitToggle(Unit unit, boolean isChecked);
     }
 
+    public interface OnUnitClickListener {
+        void onUnitClick(Unit unit);
+    }
+
     public static class Unit {
         public String id, title;
         public boolean completed;
     }
 
     private List<Unit> units;
-    private final OnUnitToggleListener listener;
+    private final OnUnitToggleListener toggleListener;
+    private final OnUnitClickListener clickListener;
 
-    public UnitAdapter(List<Unit> units, OnUnitToggleListener listener) {
+    public UnitAdapter(List<Unit> units, OnUnitToggleListener toggleListener, OnUnitClickListener clickListener) {
         this.units = units;
-        this.listener = listener;
+        this.toggleListener = toggleListener;
+        this.clickListener = clickListener;
     }
 
     public void updateData(List<Unit> newUnits) {
@@ -55,7 +61,11 @@ public class UnitAdapter extends RecyclerView.Adapter<UnitAdapter.ViewHolder> {
         holder.tvTitle.setText(unit.title != null ? unit.title : "Untitled unit");
 
         holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) ->
-                listener.onUnitToggle(unit, isChecked));
+                toggleListener.onUnitToggle(unit, isChecked));
+
+        View.OnClickListener openNotes = v -> clickListener.onUnitClick(unit);
+        holder.tvTitle.setOnClickListener(openNotes);
+        holder.ivOpenNotes.setOnClickListener(openNotes);
     }
 
     @Override
@@ -66,11 +76,13 @@ public class UnitAdapter extends RecyclerView.Adapter<UnitAdapter.ViewHolder> {
     static class ViewHolder extends RecyclerView.ViewHolder {
         CheckBox checkBox;
         TextView tvTitle;
+        android.widget.ImageView ivOpenNotes;
 
         ViewHolder(View itemView) {
             super(itemView);
             checkBox = itemView.findViewById(R.id.checkboxUnit);
             tvTitle = itemView.findViewById(R.id.tvUnitTitle);
+            ivOpenNotes = itemView.findViewById(R.id.ivOpenNotes);
         }
     }
 }

@@ -55,4 +55,6 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
 
+    implementation("io.noties.markwon:core:4.6.2")
+
 }

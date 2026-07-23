@@ -82,11 +82,6 @@ public class SubjectsFragment extends Fragment {
     }
 
     private void loadSubjects() {
-        // --- TEMPORARY: hardcoded dummy data for coordinator demo ---
-        loadDummySubjects();
-
-        // --- Real Firestore version (re-enable once demo is done) ---
-        /*
         String uid = FirebaseAuth.getInstance().getCurrentUser() != null
                 ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
         if (uid == null) return;
@@ -97,7 +92,6 @@ public class SubjectsFragment extends Fragment {
                 .addOnSuccessListener(this::bindSubjects)
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Couldn't load subjects: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-        */
     }
 
     private void loadDummySubjects() {

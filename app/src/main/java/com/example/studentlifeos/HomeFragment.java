@@ -68,7 +68,15 @@ public class HomeFragment extends Fragment {
         );
 
         rootView.findViewById(R.id.cardPyqPapers).setOnClickListener(v ->
-                Toast.makeText(getContext(), "Open PYQ Papers", Toast.LENGTH_SHORT).show());
+                startActivity(new android.content.Intent(getContext(), PapersFragment.class)));
+
+        rootView.findViewById(R.id.cardNotesRepo).setOnClickListener(v -> {
+            if (getActivity() != null) {
+                com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
+                        getActivity().findViewById(R.id.bottomNav);
+                bottomNav.setSelectedItemId(R.id.nav_subjects);
+            }
+        });
 
         return rootView;
     }

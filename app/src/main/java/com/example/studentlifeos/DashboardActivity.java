@@ -33,7 +33,7 @@ public class DashboardActivity extends AppCompatActivity {
                 loadFragment(new SubjectsFragment());
                 return true;
             } else if (id == R.id.nav_papers) {
-                // TODO: replace with your PYQ Papers fragment
+                loadFragment(new PapersFragment());
                 return true;
             }
             return false;

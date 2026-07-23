@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -10,7 +11,8 @@
         android:id="@+id/checkboxUnit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:buttonTint="@color/checkbox_tint" />
+        android:button="@drawable/checkbox_selector"
+        app:buttonTint="@null" />
 
     <TextView
         android:id="@+id/tvUnitTitle"
@@ -19,6 +21,18 @@
         android:layout_weight="1"
         android:layout_marginStart="10dp"
         android:textColor="@color/text_dark"
-        android:textSize="13sp" />
+        android:textSize="13sp"
+        android:padding="4dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground" />
+
+    <ImageView
+        android:id="@+id/ivOpenNotes"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:src="@android:drawable/ic_menu_agenda"
+        app:tint="@color/hint_gray"
+        android:contentDescription="View notes" />
 
 </LinearLayout>
