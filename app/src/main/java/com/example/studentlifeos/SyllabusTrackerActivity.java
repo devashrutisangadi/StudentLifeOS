@@ -63,8 +63,13 @@ public class SyllabusTrackerActivity extends AppCompatActivity {
     private void loadUnits(String subjectId) {
         if (subjectId == null) return;
 
+        String uid = FirebaseAuth.getInstance().getCurrentUser() != null
+                ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+        if (uid == null) return;
+
         FirebaseFirestore.getInstance().collection("units")
                 .whereEqualTo("subjectId", subjectId)
+                .whereEqualTo("studentId", uid)
                 .get()
                 .addOnSuccessListener(this::bindUnits)
                 .addOnFailureListener(e ->
