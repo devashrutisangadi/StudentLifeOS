@@ -57,4 +57,6 @@ dependencies {
 
     implementation("io.noties.markwon:core:4.6.2")
 
+    implementation("com.cloudinary:cloudinary-android:3.1.2")
+
 }

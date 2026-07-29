@@ -52,6 +52,9 @@ public class SubjectsFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         tvNoResults = view.findViewById(R.id.tvNoResults);
+        view.findViewById(R.id.fabAddSubject).setOnClickListener(v ->
+                startActivity(new android.content.Intent(getContext(), AddSubjectActivity.class))
+        );
 
         etSearchSubject = view.findViewById(R.id.etSearchSubject);
         etSearchSubject.addTextChangedListener(new TextWatcher() {
@@ -73,6 +76,7 @@ public class SubjectsFragment extends Fragment {
 
         loadSubjects();
         return view;
+
     }
 
     @Override

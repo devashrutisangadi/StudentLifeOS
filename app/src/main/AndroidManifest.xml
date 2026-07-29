@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.studentlifeos">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:name=".StudentLifeOSApp"
         android:allowBackup="true"
@@ -32,6 +33,7 @@
         <activity android:name=".NotificationsActivity" />
         <activity android:name=".NotesActivity" android:exported="false" />
         <activity android:name=".PapersListActivity" android:exported="false" />
+        <activity android:name=".AddSubjectActivity" android:exported="false" />
 
     </application>
 
