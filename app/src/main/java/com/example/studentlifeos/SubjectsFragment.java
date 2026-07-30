@@ -1,5 +1,6 @@
 package com.example.studentlifeos;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,17 +45,21 @@ public class SubjectsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerSubjects);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new SubjectAdapter(new ArrayList<>(), subject -> {
-            Intent intent = new Intent(getContext(), SyllabusTrackerActivity.class);
-            intent.putExtra("subjectId", subject.id);
-            intent.putExtra("subjectName", subject.name);
-            startActivity(intent);
-        });
+        adapter = new SubjectAdapter(
+                new ArrayList<>(),
+                subject -> {
+                    Intent intent = new Intent(getContext(), SyllabusTrackerActivity.class);
+                    intent.putExtra("subjectId", subject.id);
+                    intent.putExtra("subjectName", subject.name);
+                    startActivity(intent);
+                },
+                subject -> confirmAndDeleteSubject(subject)
+        );
         recyclerView.setAdapter(adapter);
 
         tvNoResults = view.findViewById(R.id.tvNoResults);
         view.findViewById(R.id.fabAddSubject).setOnClickListener(v ->
-                startActivity(new android.content.Intent(getContext(), AddSubjectActivity.class))
+                startActivity(new Intent(getContext(), AddSubjectActivity.class))
         );
 
         etSearchSubject = view.findViewById(R.id.etSearchSubject);
@@ -76,7 +82,6 @@ public class SubjectsFragment extends Fragment {
 
         loadSubjects();
         return view;
-
     }
 
     @Override
@@ -96,28 +101,6 @@ public class SubjectsFragment extends Fragment {
                 .addOnSuccessListener(this::bindSubjects)
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Couldn't load subjects: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-    }
-
-    private void loadDummySubjects() {
-        List<SubjectAdapter.Subject> subjects = new ArrayList<>();
-
-        subjects.add(makeSubject("1", "Java Programming", "CS101", "Prof. Turvi Pillay", 48));
-        subjects.add(makeSubject("2", "Data Structures", "CS202", "Prof. Yatan Anand", 80));
-        subjects.add(makeSubject("3", "Digital Systems", "CS203", "Prof. Michael Walla", 45));
-        subjects.add(makeSubject("4", "Discrete Structures", "CS204", "Prof. Praneel Walla", 34));
-
-        allSubjects = subjects;
-        filterSubjects(etSearchSubject.getText().toString());
-    }
-
-    private SubjectAdapter.Subject makeSubject(String id, String name, String code, String faculty, int progress) {
-        SubjectAdapter.Subject s = new SubjectAdapter.Subject();
-        s.id = id;
-        s.name = name;
-        s.code = code;
-        s.faculty = faculty;
-        s.progress = progress;
-        return s;
     }
 
     private void bindSubjects(QuerySnapshot snapshot) {
@@ -161,5 +144,47 @@ public class SubjectsFragment extends Fragment {
             tvNoResults.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void confirmAndDeleteSubject(SubjectAdapter.Subject subject) {
+        new AlertDialog.Builder(getContext())
+                .setTitle("Delete subject?")
+                .setMessage("This will also delete all of \"" + subject.name + "\"'s syllabus units. This can't be undone.")
+                .setPositiveButton("Delete", (dialog, which) -> deleteSubjectAndUnits(subject))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteSubjectAndUnits(SubjectAdapter.Subject subject) {
+        String uid = FirebaseAuth.getInstance().getCurrentUser() != null
+                ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+        if (uid == null) return;
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("units")
+                .whereEqualTo("subjectId", subject.id)
+                .whereEqualTo("studentId", uid)
+                .get()
+                .addOnSuccessListener(unitDocs -> {
+                    WriteBatch batch = db.batch();
+                    unitDocs.forEach(doc -> batch.delete(doc.getReference()));
+                    batch.delete(db.collection("subjects").document(subject.id));
+
+                    batch.commit()
+                            .addOnSuccessListener(unused -> {
+                                if (!isAdded()) return;
+                                Toast.makeText(getContext(), "Subject deleted", Toast.LENGTH_SHORT).show();
+                                loadSubjects();
+                            })
+                            .addOnFailureListener(e -> {
+                                if (!isAdded()) return;
+                                Toast.makeText(getContext(), "Couldn't delete: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    if (!isAdded()) return;
+                    Toast.makeText(getContext(), "Couldn't delete: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 }
