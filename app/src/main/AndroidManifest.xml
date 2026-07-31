@@ -35,6 +35,7 @@
         <activity android:name=".PapersListActivity" android:exported="false" />
         <activity android:name=".AddSubjectActivity" android:exported="false" />
         <activity android:name=".EditNoteActivity" android:exported="false" />
+        <activity android:name=".AddPaperActivity" android:exported="false" />
 
     </application>
 

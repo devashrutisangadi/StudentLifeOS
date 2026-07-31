@@ -34,6 +34,7 @@ public class PapersFragment extends Fragment {
 
         adapter = new SubjectAdapter(new ArrayList<>(), subject -> {
             Intent intent = new Intent(getContext(), PapersListActivity.class);
+            intent.putExtra("subjectId", subject.id);
             intent.putExtra("subjectName", subject.name);
             startActivity(intent);
         });
@@ -41,6 +42,12 @@ public class PapersFragment extends Fragment {
 
         loadSubjects();
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadSubjects();
     }
 
     private void loadSubjects() {
