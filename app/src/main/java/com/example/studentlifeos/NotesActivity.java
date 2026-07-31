@@ -1,5 +1,7 @@
 package com.example.studentlifeos;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -17,21 +19,37 @@ import io.noties.markwon.Markwon;
 public class NotesActivity extends AppCompatActivity {
 
     private Markwon markwon;
+    private String unitId, unitTitle;
+    private String currentNoteId, currentMarkdown, currentFileId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notes);
 
-        String unitId = getIntent().getStringExtra("unitId");
-        String unitTitle = getIntent().getStringExtra("unitTitle");
+        unitId = getIntent().getStringExtra("unitId");
+        unitTitle = getIntent().getStringExtra("unitTitle");
 
         ((TextView) findViewById(R.id.tvUnitTitleHeader)).setText(unitTitle != null ? unitTitle : "Notes");
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
-        markwon = Markwon.create(this);
+        findViewById(R.id.btnEditNote).setOnClickListener(v -> {
+            Intent intent = new Intent(this, EditNoteActivity.class);
+            intent.putExtra("unitId", unitId);
+            intent.putExtra("unitTitle", unitTitle);
+            intent.putExtra("noteId", currentNoteId);
+            intent.putExtra("fileId", currentFileId);
+            intent.putExtra("markdownContent", currentMarkdown);
+            startActivity(intent);
+        });
 
-        loadNote(unitId);
+        markwon = Markwon.create(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadNote(unitId); // refresh in case we just came back from editing
     }
 
     private void loadNote(String unitId) {
@@ -56,22 +74,27 @@ public class NotesActivity extends AppCompatActivity {
 
     private void bindNote(QuerySnapshot snapshot) {
         if (snapshot.isEmpty()) {
+            currentNoteId = null;
+            currentMarkdown = null;
+            currentFileId = null;
             showEmptyState();
             return;
         }
 
         DocumentSnapshot doc = snapshot.getDocuments().get(0);
-        String markdown = doc.getString("markdownContent");
-        String fileId = doc.getString("fileId");
+        currentNoteId = doc.getId();
+        currentMarkdown = doc.getString("markdownContent");
+        currentFileId = doc.getString("fileId");
 
         TextView tvContent = findViewById(R.id.tvNoteContent);
         findViewById(R.id.tvEmptyState).setVisibility(View.GONE);
         tvContent.setVisibility(View.VISIBLE);
 
-        markwon.setMarkdown(tvContent, markdown != null ? markdown : "_No content available._");
+        markwon.setMarkdown(tvContent, currentMarkdown != null ? currentMarkdown : "_No content available._");
 
-        if (fileId != null) {
-            loadAttachment(fileId);
+        findViewById(R.id.tvAttachment).setVisibility(View.GONE);
+        if (currentFileId != null) {
+            loadAttachment(currentFileId);
         }
     }
 
@@ -81,14 +104,24 @@ public class NotesActivity extends AppCompatActivity {
                     if (!doc.exists()) return;
                     String fileName = doc.getString("fileName");
                     String fileType = doc.getString("fileType");
+                    String fileUrl = doc.getString("fileUrl"); // only present on real uploads
+
                     TextView tvAttachment = findViewById(R.id.tvAttachment);
                     tvAttachment.setVisibility(View.VISIBLE);
                     tvAttachment.setText("📎 " + (fileName != null ? fileName : "attachment")
                             + (fileType != null ? " (" + fileType + ")" : ""));
-                    tvAttachment.setOnClickListener(v ->
-                            Toast.makeText(this,
-                                    "File uploads aren't available yet — this is placeholder metadata only",
-                                    Toast.LENGTH_LONG).show());
+
+                    if (fileUrl != null) {
+                        tvAttachment.setOnClickListener(v -> {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(fileUrl));
+                            startActivity(intent);
+                        });
+                    } else {
+                        // Dataset-imported placeholder metadata — no real file behind it
+                        tvAttachment.setOnClickListener(v ->
+                                Toast.makeText(this, "This is sample data from the imported dataset — no real file attached",
+                                        Toast.LENGTH_LONG).show());
+                    }
                 });
     }
 
