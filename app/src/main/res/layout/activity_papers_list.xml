@@ -2,48 +2,149 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/dashboard_bg">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@color/signup_card_bg">
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:padding="16dp">
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="14dp">
 
             <ImageView
                 android:id="@+id/btnBack"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_arrow_back"
-                app:tint="@color/text_dark"
+                app:tint="@color/purple_accent"
                 android:clickable="true"
                 android:focusable="true" />
 
             <TextView
                 android:id="@+id/tvSubjectTitle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:layout_marginStart="12dp"
-                android:textColor="@color/text_dark"
+                android:textColor="@color/purple_accent"
                 android:textStyle="bold"
-                android:textSize="18sp" />
+                android:textSize="20sp" />
+
         </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerPapers"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:id="@+id/tabAll"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_tab_selected"
+                android:gravity="center"
+                android:paddingVertical="10dp"
+                android:text="All"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/tabMidSem"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_tab_unselected"
+                android:gravity="center"
+                android:paddingVertical="10dp"
+                android:text="Mid-Sem"
+                android:textColor="@color/text_charcoal"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/tabEndSem"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/bg_tab_unselected"
+                android:gravity="center"
+                android:paddingVertical="10dp"
+                android:text="End-Sem"
+                android:textColor="@color/text_charcoal"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </LinearLayout>
+
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingHorizontal="16dp"
-            android:clipToPadding="false"
-            android:paddingBottom="80dp" />
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerPapers"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="16dp"
+                android:clipToPadding="false"
+                android:paddingBottom="90dp" />
+
+            <LinearLayout
+                android:id="@+id/emptyPapersState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_papers"
+                    app:tint="@color/text_gray"
+                    android:alpha="0.6" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Upload papers"
+                    android:textColor="@color/text_charcoal"
+                    android:textStyle="bold"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Tap + to add a paper for this subject"
+                    android:textColor="@color/text_gray"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+        </FrameLayout>
 
     </LinearLayout>
 
@@ -54,8 +155,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
         android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="@color/button_peach"
-        app:tint="@color/text_dark"
+        app:backgroundTint="@color/purple_accent"
+        app:tint="@color/white"
         android:contentDescription="Add paper" />
 
 </FrameLayout>

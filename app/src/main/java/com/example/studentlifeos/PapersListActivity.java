@@ -2,6 +2,7 @@ package com.example.studentlifeos;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +39,8 @@ public class PapersListActivity extends AppCompatActivity {
 
         adapter = new PaperAdapter(
                 new ArrayList<>(),
+                FirebaseAuth.getInstance().getCurrentUser() != null
+                        ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null,
                 paper -> {
                     if (paper.fileUrl != null) {
                         Intent intent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(paper.fileUrl));
@@ -57,7 +60,40 @@ public class PapersListActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        setupFilterTabs();
         loadPapers();
+    }
+
+    private void setupFilterTabs() {
+        TextView tabAll = findViewById(R.id.tabAll);
+        TextView tabMid = findViewById(R.id.tabMidSem);
+        TextView tabEnd = findViewById(R.id.tabEndSem);
+
+        View.OnClickListener onTabClick = v -> {
+            tabAll.setBackgroundResource(R.drawable.bg_tab_unselected);
+            tabMid.setBackgroundResource(R.drawable.bg_tab_unselected);
+            tabEnd.setBackgroundResource(R.drawable.bg_tab_unselected);
+            tabAll.setTextColor(getColor(R.color.text_charcoal));
+            tabMid.setTextColor(getColor(R.color.text_charcoal));
+            tabEnd.setTextColor(getColor(R.color.text_charcoal));
+
+            TextView selected = (TextView) v;
+            selected.setBackgroundResource(R.drawable.bg_tab_selected);
+            selected.setTextColor(getColor(R.color.white));
+
+            if (v.getId() == R.id.tabAll) {
+                adapter.setFilter(null);
+            } else if (v.getId() == R.id.tabMidSem) {
+                adapter.setFilter("Mid-Semester");
+            } else {
+                adapter.setFilter("End-Semester");
+            }
+            updateEmptyState();
+        };
+
+        tabAll.setOnClickListener(onTabClick);
+        tabMid.setOnClickListener(onTabClick);
+        tabEnd.setOnClickListener(onTabClick);
     }
 
     @Override
@@ -73,7 +109,6 @@ public class PapersListActivity extends AppCompatActivity {
 
         FirebaseFirestore.getInstance().collection("papers")
                 .whereEqualTo("subjectId", subjectId)
-                .whereEqualTo("studentId", uid)
                 .get()
                 .addOnSuccessListener(this::bindPapers)
                 .addOnFailureListener(e ->
@@ -89,11 +124,18 @@ public class PapersListActivity extends AppCompatActivity {
             p.examType = doc.getString("examType");
             p.fileUrl = doc.getString("fileUrl");
             p.fileType = doc.getString("fileType");
+            p.studentId = doc.getString("studentId");
             Object year = doc.get("year");
             p.year = year != null ? ((Number) year).intValue() : 0;
             papers.add(p);
         });
         adapter.updateData(papers);
+        updateEmptyState();
+    }
+
+    private void updateEmptyState() {
+        findViewById(R.id.emptyPapersState).setVisibility(
+                adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
     }
 
     private void confirmAndDeletePaper(PaperAdapter.Paper paper) {

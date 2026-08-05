@@ -1,101 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_subject_card">
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:orientation="vertical"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/bg_subject_card">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp">
 
+        <!-- Icon circle -->
+        <FrameLayout
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_icon_circle"
+            android:layout_marginEnd="12dp">
+
+            <ImageView
+                android:id="@+id/ivSubjectIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_subject_generic"
+                android:contentDescription="Subject icon" />
+        </FrameLayout>
+
+        <!-- Name, faculty, progress row, progress bar -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="12dp">
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-            <!-- Icon circle -->
-            <FrameLayout
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_icon_circle"
-                android:layout_marginEnd="12dp">
-
-                <ImageView
-                    android:id="@+id/ivSubjectIcon"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_subject_generic"
-                    android:contentDescription="Subject icon" />
-            </FrameLayout>
-
-            <!-- Name, faculty, progress row, progress bar -->
-            <LinearLayout
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/tvSubjectName"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:textStyle="bold"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tvSubjectFaculty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="@color/subject_secondary_text" />
+
+            <!-- Progress label row: "Progress" left, "%" right -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp">
 
                 <TextView
-                    android:id="@+id/tvSubjectName"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:textSize="16sp" />
+                    android:layout_weight="1"
+                    android:text="Progress"
+                    android:textSize="12sp"
+                    android:textColor="@color/subject_secondary_text" />
 
                 <TextView
-                    android:id="@+id/tvSubjectFaculty"
-                    android:layout_width="match_parent"
+                    android:id="@+id/tvSubjectProgress"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="12sp"
                     android:textColor="@color/subject_secondary_text" />
 
-                <!-- Progress label row: "Progress" left, "%" right -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="10dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Progress"
-                        android:textSize="12sp"
-                        android:textColor="@color/subject_secondary_text" />
-
-                    <TextView
-                        android:id="@+id/tvSubjectProgress"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="12sp"
-                        android:textColor="@color/subject_secondary_text" />
-
-                </LinearLayout>
-
-                <ProgressBar
-                    android:id="@+id/progressSubject"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="6dp"
-                    android:layout_marginTop="4dp"
-                    android:max="100"
-                    android:progressDrawable="@drawable/progress_bar_style" />
-
             </LinearLayout>
-            <ImageView
-                android:id="@+id/ivDeleteSubject"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginStart="10dp"
-                android:src="@android:drawable/ic_menu_delete"
-                app:tint="@color/hint_gray"
-                android:clickable="true"
-                android:focusable="true"
-                android:contentDescription="Delete subject" />
+
+            <ProgressBar
+                android:id="@+id/progressSubject"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginTop="6dp"
+                android:max="100"
+                android:progressDrawable="@drawable/progress_bar_style" />
 
         </LinearLayout>
+        <ImageView
+            android:id="@+id/ivDeleteSubject"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="10dp"
+            android:src="@android:drawable/ic_menu_delete"
+            app:tint="@color/hint_gray"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="Delete subject" />
 
     </LinearLayout>
+
+</LinearLayout>

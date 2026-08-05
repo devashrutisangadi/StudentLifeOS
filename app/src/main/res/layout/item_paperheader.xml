@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tvYearHeader"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="18dp"
+    android:layout_marginBottom="8dp"
+    android:textColor="@color/papers_title_purple"
+    android:textStyle="bold"
+    android:textSize="14sp"
+    android:letterSpacing="0.04"
+    tools:ignore="MissingPrefix"
+    tools:text="2025" />

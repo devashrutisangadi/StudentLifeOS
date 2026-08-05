@@ -23,16 +23,16 @@
     <color name="beige">#f5f5dc</color>
     <color name="bisque">#ffe4c4</color>
     <!-- Light Theme Splash -->
-        <color name="splash_bg_light">#D8B4E2</color>
-        <color name="splash_accent_light">#FFD700</color>
-        <color name="splash_secondary_light">#BFA2DB</color>
-        <color name="splash_fallback_bg">#BEA5F1</color>
+    <color name="splash_bg_light">#D8B4E2</color>
+    <color name="splash_accent_light">#FFD700</color>
+    <color name="splash_secondary_light">#BFA2DB</color>
+    <color name="splash_fallback_bg">#BEA5F1</color>
 
     <!-- Dark Theme Splash -->
-        <color name="splash_bg_dark">#2E1A47</color>
-        <color name="splash_accent_dark">#FFD700</color>
-        <color name="splash_secondary_dark">#4B2C72</color>
-        <color name="splash_fallback_bg_dark">#825ACF</color>
+    <color name="splash_bg_dark">#2E1A47</color>
+    <color name="splash_accent_dark">#FFD700</color>
+    <color name="splash_secondary_dark">#4B2C72</color>
+    <color name="splash_fallback_bg_dark">#825ACF</color>
 
 
     <!-- Login/SignUp Page - light theme-->
@@ -46,7 +46,7 @@
     <color name="login_button_start">#F7A8C4</color>
     <color name="login_button_end">#BFA2DB</color>
 
-<!-- Drawable Colors -->
+    <!-- Drawable Colors -->
     <color name="signup_card_bg">#FFFFFF</color>
     <color name="text_dark">#2E2A47</color>
     <color name="hint_gray">#A6A0BE</color>
@@ -74,6 +74,38 @@
 
     <!-- -->
     <color name="subject_secondary_text">#5B5470</color>
+
+    <!-- paper (light-mode values; dark-mode originals now live in values-night/colors.xml) -->
+    <color name="papers_bg">#F7F6FB</color>
+    <color name="papers_title_purple">#7C6FD6</color>
+    <color name="papers_search_bg">#EAE3FF</color>
+    <color name="papers_search_hint">#7A7488</color>
+    <color name="papers_add_btn_bg">#F1EDFB</color>
+    <color name="papers_add_btn_border">#9B7FE0</color>
+    <color name="papers_pill_bg">#EDEAF7</color>
+    <color name="papers_pill_selected_bg">#7C6FD6</color>
+    <color name="papers_pill_text">#8A8494</color>
+    <color name="papers_pill_text_selected">#FFFFFF</color>
+    <color name="papers_pill_divider">#E0E0E0</color>
+    <color name="papers_bell_icon">#5B5470</color>
+    <color name="papers_category_fill">#D9D4EC</color>
+    <color name="papers_category_fill_selected">#7C6FD6</color>
+    <color name="papers_category_text">#FFFFFF</color>
+    <color name="papers_category_border_selected">#E8E0F7</color>
+
+    <!-- Inactive chip: quiet, outlined, low contrast -->
+    <color name="papers_category_fill_inactive">#EDEAF7</color>
+    <color name="papers_category_border_inactive">#DCD3F5</color>
+    <color name="papers_category_text_inactive">#8A8494</color>
+
+    <!-- Active chip: the one that should stand out -->
+    <color name="papers_category_fill_active">#7C6FD6</color>
+    <color name="papers_category_text_active">#FFFFFF</color>
+    <color name="papers_empty_text">#5B5470</color>
+
+    <color name="papers_card_bg">#EAE3FF</color>
+    <color name="papers_card_border">#40B8A8E8</color>
+    <color name="papers_card_title">#2E2A47</color>
 
 
 
