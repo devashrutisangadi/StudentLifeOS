@@ -99,6 +99,17 @@
             android:focusable="true"
             android:contentDescription="Delete subject" />
 
+        <ImageView
+            android:id="@+id/ivAttendance"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="10dp"
+            android:src="@android:drawable/ic_menu_my_calendar"
+            app:tint="@color/hint_gray"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="Attendance" />
+
     </LinearLayout>
 
 </LinearLayout>

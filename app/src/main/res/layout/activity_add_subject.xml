@@ -70,6 +70,18 @@
             android:textColorHint="@color/hint_gray"
             android:textSize="15sp" />
 
+        <EditText
+            android:id="@+id/etTotalLectures"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_edittext_signup"
+            android:hint="Total lectures this semester (optional, enables attendance prediction)"
+            android:inputType="number"
+            android:paddingHorizontal="16dp"
+            android:textColorHint="@color/hint_gray"
+            android:textSize="13sp" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

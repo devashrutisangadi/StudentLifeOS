@@ -22,24 +22,37 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
         void onSubjectDelete(Subject subject);
     }
 
+    public interface OnSubjectAttendanceListener {
+        void onSubjectAttendance(Subject subject);
+    }
+
     public static class Subject {
         public String id, name, code, faculty;
         public int progress;
+        public Long totalLecturesPlanned; // null if not set
     }
 
     private List<Subject> subjects;
     private final OnSubjectClickListener listener;
     private final OnSubjectDeleteListener deleteListener; // null = delete icon hidden
+    private final OnSubjectAttendanceListener attendanceListener; // null = attendance icon hidden
 
     public SubjectAdapter(List<Subject> subjects, OnSubjectClickListener listener) {
-        this(subjects, listener, null);
+        this(subjects, listener, null, null);
     }
 
     public SubjectAdapter(List<Subject> subjects, OnSubjectClickListener listener,
                           OnSubjectDeleteListener deleteListener) {
+        this(subjects, listener, deleteListener, null);
+    }
+
+    public SubjectAdapter(List<Subject> subjects, OnSubjectClickListener listener,
+                          OnSubjectDeleteListener deleteListener,
+                          OnSubjectAttendanceListener attendanceListener) {
         this.subjects = subjects;
         this.listener = listener;
         this.deleteListener = deleteListener;
+        this.attendanceListener = attendanceListener;
     }
 
     public void updateData(List<Subject> newSubjects) {
@@ -71,6 +84,13 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
         } else {
             holder.ivDelete.setVisibility(View.GONE);
         }
+
+        if (attendanceListener != null) {
+            holder.ivAttendance.setVisibility(View.VISIBLE);
+            holder.ivAttendance.setOnClickListener(v -> attendanceListener.onSubjectAttendance(subject));
+        } else {
+            holder.ivAttendance.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -79,7 +99,7 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivIcon, ivDelete;
+        ImageView ivIcon, ivDelete, ivAttendance;
         TextView tvName, tvFaculty, tvProgress;
         ProgressBar progressBar;
 
@@ -91,6 +111,7 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.ViewHold
             tvProgress = itemView.findViewById(R.id.tvSubjectProgress);
             progressBar = itemView.findViewById(R.id.progressSubject);
             ivDelete = itemView.findViewById(R.id.ivDeleteSubject);
+            ivAttendance = itemView.findViewById(R.id.ivAttendance);
         }
     }
 }

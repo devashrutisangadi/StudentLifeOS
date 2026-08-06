@@ -53,7 +53,13 @@ public class SubjectsFragment extends Fragment {
                     intent.putExtra("subjectName", subject.name);
                     startActivity(intent);
                 },
-                subject -> confirmAndDeleteSubject(subject)
+                subject -> confirmAndDeleteSubject(subject),
+                subject -> {
+                    Intent intent = new Intent(getContext(), AttendanceDetailActivity.class);
+                    intent.putExtra("subjectId", subject.id);
+                    intent.putExtra("subjectName", subject.name);
+                    startActivity(intent);
+                }
         );
         recyclerView.setAdapter(adapter);
 
@@ -115,9 +121,12 @@ public class SubjectsFragment extends Fragment {
             Object progress = doc.get("progress");
             s.progress = progress != null ? ((Number) progress).intValue() : 0;
             subjects.add(s);
+            Object totalLectures = doc.get("totalLecturesPlanned");
+            s.totalLecturesPlanned = totalLectures != null ? ((Number) totalLectures).longValue() : null;
         });
         allSubjects = subjects;
         filterSubjects(etSearchSubject.getText().toString());
+
     }
 
     private void filterSubjects(String query) {

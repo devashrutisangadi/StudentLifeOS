@@ -59,6 +59,9 @@ public class AddSubjectActivity extends AppCompatActivity {
         EditText etName = findViewById(R.id.etSubjectName);
         EditText etCode = findViewById(R.id.etSubjectCode);
         EditText etFaculty = findViewById(R.id.etSubjectFaculty);
+        EditText etTotalLectures = findViewById(R.id.etTotalLectures);
+        String totalLecturesText = etTotalLectures.getText().toString().trim();
+        Long totalLecturesPlanned = totalLecturesText.isEmpty() ? null : Long.parseLong(totalLecturesText);
 
         String name = etName.getText().toString().trim();
         String code = etCode.getText().toString().trim();
@@ -84,6 +87,9 @@ public class AddSubjectActivity extends AppCompatActivity {
         subject.put("code", code);
         subject.put("faculty", faculty);
         subject.put("progress", 0);
+        if (totalLecturesPlanned != null) {
+            subject.put("totalLecturesPlanned", totalLecturesPlanned);
+        }
 
         db.collection("subjects").add(subject)
                 .addOnSuccessListener(subjectRef -> {
