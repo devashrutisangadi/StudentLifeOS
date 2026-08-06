@@ -251,7 +251,7 @@
             android:orientation="horizontal">
 
             <LinearLayout
-                android:id="@+id/cardNotesRepo"
+                android:id="@+id/cardAttendance"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -267,14 +267,14 @@
                 <ImageView
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:src="@android:drawable/ic_menu_agenda"
+                    android:src="@drawable/ic_attendance"
                     app:tint="@color/purple_accent"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="Notes Repo"
+                    android:text="Attendance"
                     android:textColor="@color/text_charcoal"
                     android:textStyle="bold"
                     android:textSize="14sp"/>
@@ -297,7 +297,7 @@
                 <ImageView
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:src="@android:drawable/ic_menu_save"
+                    android:src="@drawable/ic_papers"
                     app:tint="@color/purple_accent"/>
 
                 <TextView
@@ -351,12 +351,35 @@
                     android:textSize="14sp"/>
             </LinearLayout>
 
-            <!-- Empty spacer, keeps Subjects card the same width as the row above -->
-            <View
+            <LinearLayout
+                android:id="@+id/cardNotesRepo"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"/>
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_quick_access_card"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_notes"
+                    app:tint="@color/purple_accent"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Notes Repo"
+                    android:textColor="@color/text_charcoal"
+                    android:textStyle="bold"
+                    android:textSize="14sp"/>
+            </LinearLayout>
 
         </LinearLayout>
 

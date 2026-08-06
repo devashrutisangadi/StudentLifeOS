@@ -85,6 +85,9 @@ public class HomeFragment extends Fragment {
                 bottomNav.setSelectedItemId(R.id.nav_subjects);
             }
         });
+        rootView.findViewById(R.id.cardAttendance).setOnClickListener(v ->
+                startActivity(new android.content.Intent(getContext(), AttendanceOverviewActivity.class))
+        ); 
 
         return rootView;
     }

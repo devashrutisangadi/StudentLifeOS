@@ -37,6 +37,7 @@
         <activity android:name=".EditNoteActivity" android:exported="false" />
         <activity android:name=".AddPaperActivity" android:exported="false" />
         <activity android:name=".AttendanceDetailActivity" android:exported="false" />
+        <activity android:name=".AttendanceOverviewActivity" android:exported="false" />
 
     </application>
 
