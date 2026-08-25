@@ -39,6 +39,20 @@
             android:clickable="true"
             android:focusable="true"
             android:contentDescription="Edit note" />
+
+        <TextView
+            android:id="@+id/btnOpenFlashcards"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:background="@drawable/bg_pill_purple"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:text="Flashcards"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:clickable="true"
+            android:focusable="true" />
     </LinearLayout>
 
     <TextView

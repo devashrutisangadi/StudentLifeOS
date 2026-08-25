@@ -38,6 +38,10 @@
         <activity android:name=".AddPaperActivity" android:exported="false" />
         <activity android:name=".AttendanceDetailActivity" android:exported="false" />
         <activity android:name=".AttendanceOverviewActivity" android:exported="false" />
+        <activity android:name=".FlashcardsActivity" android:exported="false" />
+        <activity android:name=".AddFlashcardActivity" android:exported="false" />
+        <activity android:name=".GenerateFlashcardsActivity" android:exported="false" />
+        <activity android:name=".FlashcardStudyActivity" android:exported="false" />
 
     </application>
 

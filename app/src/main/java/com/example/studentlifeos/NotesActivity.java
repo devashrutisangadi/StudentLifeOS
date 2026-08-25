@@ -43,6 +43,13 @@ public class NotesActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        findViewById(R.id.btnOpenFlashcards).setOnClickListener(v -> {
+            Intent intent = new Intent(this, FlashcardsActivity.class);
+            intent.putExtra("unitId", unitId);
+            intent.putExtra("unitTitle", unitTitle);
+            startActivity(intent);
+        });
+
         markwon = Markwon.create(this);
     }
 
