@@ -12,18 +12,19 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Fetches the unit's existing note, sends it to Claude to draft flashcards, then shows
- * an editable review list (checkbox to include/exclude, inline edit) before writing the
- * chosen cards to Firestore.
+ * Fetches the unit's existing note (typed text, and — if attached — the linked PDF's
+ * extracted text), sends the combined content to Groq to draft flashcards, then shows an
+ * editable review list (checkbox to include/exclude, inline edit) before writing the chosen
+ * cards to Firestore.
  */
 public class GenerateFlashcardsActivity extends AppCompatActivity {
 
@@ -61,7 +62,7 @@ public class GenerateFlashcardsActivity extends AppCompatActivity {
     }
 
     private void startGeneration() {
-        setLoadingState();
+        setLoadingState("Reading your notes…");
 
         String uid = FirebaseAuth.getInstance().getCurrentUser() != null
                 ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
@@ -85,13 +86,60 @@ public class GenerateFlashcardsActivity extends AppCompatActivity {
             return;
         }
 
-        String markdown = snapshot.getDocuments().get(0).getString("markdownContent");
-        if (markdown == null || markdown.trim().isEmpty()) {
-            showError("This unit's note is empty — write something first");
+        DocumentSnapshot noteDoc = snapshot.getDocuments().get(0);
+        String markdown = noteDoc.getString("markdownContent");
+        String fileId = noteDoc.getString("fileId");
+
+        if (fileId == null) {
+            // No attachment — just the typed text.
+            proceedWithContent(markdown, null);
             return;
         }
 
-        GroqApiClient.generateFlashcards(this, unitTitle, markdown, new GroqApiClient.GenerateCallback() {
+        // There's an attachment: look it up to see if it's a PDF we can actually read.
+        FirebaseFirestore.getInstance().collection("uploaded_files").document(fileId).get()
+                .addOnSuccessListener(fileDoc -> onAttachmentFetched(fileDoc, markdown))
+                .addOnFailureListener(e -> proceedWithContent(markdown, null)); // fall back silently
+    }
+
+    private void onAttachmentFetched(DocumentSnapshot fileDoc, String markdown) {
+        String fileUrl = fileDoc.exists() ? fileDoc.getString("fileUrl") : null;
+        String fileType = fileDoc.exists() ? fileDoc.getString("fileType") : null;
+
+        if (fileUrl == null || !"pdf".equalsIgnoreCase(fileType)) {
+            // Either a placeholder/no real file, or an attachment type we don't parse yet.
+            proceedWithContent(markdown, null);
+            return;
+        }
+
+        setLoadingState("Reading the attached PDF…");
+        PdfTextExtractor.extractFromUrl(this, fileUrl, new PdfTextExtractor.ExtractCallback() {
+            @Override
+            public void onSuccess(String text) {
+                proceedWithContent(markdown, text);
+            }
+
+            @Override
+            public void onError(String message) {
+                // Don't hard-fail the whole flow over a PDF read issue — fall back to
+                // whatever typed text exists, but let the student know why.
+                Toast.makeText(GenerateFlashcardsActivity.this,
+                        "Couldn't read the PDF (" + message + ") — using typed note text only",
+                        Toast.LENGTH_LONG).show();
+                proceedWithContent(markdown, null);
+            }
+        });
+    }
+
+    private void proceedWithContent(String markdown, String pdfText) {
+        String combined = combineContent(markdown, pdfText);
+        if (combined.trim().isEmpty()) {
+            showError("This unit's note is empty — write something or attach a readable PDF first");
+            return;
+        }
+
+        setLoadingState("Drafting cards…");
+        GroqApiClient.generateFlashcards(this, unitTitle, combined, new GroqApiClient.GenerateCallback() {
             @Override
             public void onSuccess(List<FlashcardItem> drafts) {
                 showReview(drafts);
@@ -102,6 +150,18 @@ public class GenerateFlashcardsActivity extends AppCompatActivity {
                 showError("Generation failed: " + message);
             }
         });
+    }
+
+    private String combineContent(String markdown, String pdfText) {
+        StringBuilder sb = new StringBuilder();
+        if (markdown != null && !markdown.trim().isEmpty()) {
+            sb.append(markdown.trim());
+        }
+        if (pdfText != null && !pdfText.trim().isEmpty()) {
+            if (sb.length() > 0) sb.append("\n\n---\n\n");
+            sb.append(pdfText.trim());
+        }
+        return sb.toString();
     }
 
     private void showReview(List<FlashcardItem> drafts) {
@@ -161,9 +221,9 @@ public class GenerateFlashcardsActivity extends AppCompatActivity {
         }
     }
 
-    private void setLoadingState() {
+    private void setLoadingState(String message) {
         progressBar.setVisibility(View.VISIBLE);
-        tvStatus.setText("Reading your notes and drafting cards…");
+        tvStatus.setText(message);
         tvStatus.setVisibility(View.VISIBLE);
         btnRetry.setVisibility(View.GONE);
         recyclerReview.setVisibility(View.GONE);

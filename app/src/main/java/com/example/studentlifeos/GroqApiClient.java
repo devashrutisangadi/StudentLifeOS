@@ -21,9 +21,13 @@ import java.util.concurrent.Executors;
  * Gradle dependency is required.
  *
  * Groq's free tier (no credit card) is the most generous of the no-cost options as of 2026:
- * roughly 30 requests/minute and 1,000 requests/day on Llama 3.3 70B. Get a key at
- * https://console.groq.com/keys. Check the live numbers on your Groq console since these
- * shift over time.
+ * roughly 30 requests/minute and 1,000 requests/day. Get a key at
+ * https://console.groq.com/keys.
+ *
+ * Groq retires models on a schedule (see console.groq.com/docs/deprecations) — that's why
+ * the model id below is read from BuildConfig.GROQ_MODEL instead of hardcoded, so it can be
+ * swapped in local.properties without touching code. DEFAULT_MODEL is only a fallback for
+ * when GROQ_MODEL isn't set.
  *
  * IMPORTANT — API key handling:
  * GROQ_API_KEY is read from BuildConfig, populated from local.properties at build time
@@ -34,7 +38,10 @@ import java.util.concurrent.Executors;
  */
 public class GroqApiClient {
 
-    private static final String MODEL = "llama-3.3-70b-versatile";
+    // Fallback used only if GROQ_MODEL is blank/unset in local.properties.
+    // Last confirmed working: openai/gpt-oss-120b (Sept 2026), Groq's recommended
+    // replacement after llama-3.3-70b-versatile was decommissioned Aug 16, 2026.
+    private static final String DEFAULT_MODEL = "openai/gpt-oss-120b";
     private static final String API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -46,7 +53,7 @@ public class GroqApiClient {
 
     /** Runs the network call off the main thread; delivers the callback back on it. */
     public static void generateFlashcards(android.app.Activity activity, String unitTitle,
-                                           String noteMarkdown, GenerateCallback callback) {
+                                          String noteMarkdown, GenerateCallback callback) {
         executor.execute(() -> {
             try {
                 List<FlashcardItem> drafts = doGenerate(unitTitle, noteMarkdown);
@@ -57,11 +64,22 @@ public class GroqApiClient {
         });
     }
 
+    private static String resolveModel() {
+        try {
+            String configured = BuildConfig.GROQ_MODEL;
+            return (configured != null && !configured.trim().isEmpty()) ? configured.trim() : DEFAULT_MODEL;
+        } catch (NoSuchFieldError e) {
+            // GROQ_MODEL not added to build.gradle.kts yet — fall back quietly.
+            return DEFAULT_MODEL;
+        }
+    }
+
     private static List<FlashcardItem> doGenerate(String unitTitle, String noteMarkdown) throws Exception {
         String apiKey = BuildConfig.GROQ_API_KEY;
         if (apiKey == null || apiKey.trim().isEmpty()) {
             throw new IllegalStateException("Missing GROQ_API_KEY — add it to local.properties");
         }
+        String model = resolveModel();
 
         // json_object mode (OpenAI-compatible) requires a JSON *object* at the top level,
         // not a bare array, and the word "json" must appear in the prompt.
@@ -75,7 +93,7 @@ public class GroqApiClient {
 
         JSONObject message = new JSONObject().put("role", "user").put("content", prompt);
         JSONObject body = new JSONObject();
-        body.put("model", MODEL);
+        body.put("model", model);
         body.put("messages", new JSONArray().put(message));
         body.put("response_format", new JSONObject().put("type", "json_object"));
         body.put("temperature", 0.5);
@@ -98,6 +116,10 @@ public class GroqApiClient {
 
         if (status == 429) {
             throw new RuntimeException("Free tier rate limit hit — wait a minute and try again");
+        }
+        if (status == 404 && responseText.contains("model_not_found")) {
+            throw new RuntimeException("Model \"" + model + "\" isn't available on Groq anymore — "
+                    + "update GROQ_MODEL in local.properties. Check console.groq.com/docs/deprecations");
         }
         if (status < 200 || status >= 300) {
             throw new RuntimeException("API error (" + status + "): " + responseText);

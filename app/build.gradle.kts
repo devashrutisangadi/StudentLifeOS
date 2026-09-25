@@ -24,6 +24,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GROQ_API_KEY", "\"${localProperties.getProperty("GROQ_API_KEY", "")}\"")
+        buildConfigField("String", "GROQ_MODEL", "\"${localProperties.getProperty("GROQ_MODEL", "")}\"")
     }
 
     buildTypes {
@@ -69,5 +70,7 @@ dependencies {
     implementation("io.noties.markwon:core:4.6.2")
 
     implementation("com.cloudinary:cloudinary-android:3.1.2")
+
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
 
 }

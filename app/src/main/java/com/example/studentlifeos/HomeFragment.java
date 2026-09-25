@@ -87,7 +87,19 @@ public class HomeFragment extends Fragment {
         });
         rootView.findViewById(R.id.cardAttendance).setOnClickListener(v ->
                 startActivity(new android.content.Intent(getContext(), AttendanceOverviewActivity.class))
-        ); 
+        );
+
+        // Flashcards (like Notes) only exists per-unit, so — same as cardNotesRepo above —
+        // this switches to the Subjects tab rather than opening a flashcards screen directly.
+        // The student picks a unit there, then taps the Flashcards pill from that unit's
+        // Notes screen.
+        rootView.findViewById(R.id.cardFlashcards).setOnClickListener(v -> {
+            if (getActivity() != null) {
+                com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
+                        getActivity().findViewById(R.id.bottomNav);
+                bottomNav.setSelectedItemId(R.id.nav_subjects);
+            }
+        });
 
         return rootView;
     }

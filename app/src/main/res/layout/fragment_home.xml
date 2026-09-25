@@ -312,7 +312,7 @@
 
         </LinearLayout>
 
-        <!-- Row 2: new Subjects card, same width as one grid cell -->
+        <!-- Row 2: Subjects / Notes Repo -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -380,6 +380,56 @@
                     android:textStyle="bold"
                     android:textSize="14sp"/>
             </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Row 3: Flashcards (half-width, left-aligned to match the grid above) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/cardFlashcards"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_quick_access_card"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_flashcards"
+                    app:tint="@color/purple_accent"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Flashcards"
+                    android:textColor="@color/text_charcoal"
+                    android:textStyle="bold"
+                    android:textSize="14sp"/>
+            </LinearLayout>
+
+            <!-- Empty spacer to keep cardFlashcards half-width and left-aligned,
+                 matching the grid above. Delete this View and set cardFlashcards'
+                 layout_marginEnd to 0dp if you'd rather it span full width instead. -->
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"/>
 
         </LinearLayout>
 
