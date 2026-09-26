@@ -231,6 +231,41 @@
             android:layout_marginTop="12dp"
             android:orientation="vertical"/>
 
+        <!-- ===== Empty state: no classes today (shown/hidden in Java) ===== -->
+        <LinearLayout
+            android:id="@+id/timetableEmptyPrompt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_quick_access_card"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:id="@+id/tvTimetableEmptyMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No classes scheduled for today."
+                android:textColor="@color/text_gray"
+                android:textSize="13sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="View or upload timetable →"
+                android:textColor="@color/purple_accent"
+                android:textStyle="bold"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
         <!-- ===== Quick Access ===== -->
         <TextView
             android:layout_width="wrap_content"

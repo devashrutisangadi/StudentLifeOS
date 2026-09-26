@@ -139,7 +139,7 @@ public class GenerateFlashcardsActivity extends AppCompatActivity {
         }
 
         setLoadingState("Drafting cards…");
-        GroqApiClient.generateFlashcards(this, unitTitle, combined, new GroqApiClient.GenerateCallback() {
+        GroqApiClient.generateFlashcards(this, unitTitle, combined, new GroqApiClient.GenerateFlashcardsCallback() {
             @Override
             public void onSuccess(List<FlashcardItem> drafts) {
                 showReview(drafts);

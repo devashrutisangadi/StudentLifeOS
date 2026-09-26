@@ -42,6 +42,7 @@
         <activity android:name=".AddFlashcardActivity" android:exported="false" />
         <activity android:name=".GenerateFlashcardsActivity" android:exported="false" />
         <activity android:name=".FlashcardStudyActivity" android:exported="false" />
+        <activity android:name=".TimetableActivity" android:exported="false" />"
 
     </application>
 

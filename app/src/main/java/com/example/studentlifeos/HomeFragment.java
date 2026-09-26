@@ -1,5 +1,6 @@
 package com.example.studentlifeos;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,8 @@ import androidx.fragment.app.Fragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,14 +31,12 @@ public class HomeFragment extends Fragment {
     private static class ClassItem {
         String time, subject, professorRoom;
         boolean isCurrent;
-        boolean isNew;
 
-        ClassItem(String time, String subject, String professorRoom, boolean isCurrent, boolean isNew) {
+        ClassItem(String time, String subject, String professorRoom, boolean isCurrent) {
             this.time = time;
             this.subject = subject;
             this.professorRoom = professorRoom;
             this.isCurrent = isCurrent;
-            this.isNew = isNew;
         }
     }
 
@@ -47,21 +48,13 @@ public class HomeFragment extends Fragment {
         timelineContainer = rootView.findViewById(R.id.timelineContainer);
 
         loadStudentData();
-
-        // TODO: replace this static list with real timetable data once that
-        // feature/collection exists — the current dataset has no schedule.
-        List<ClassItem> classes = new ArrayList<>();
-        classes.add(new ClassItem("9:00 - 10:00 AM", "Data Structures", "Prof. Name · Room", true, false));
-        classes.add(new ClassItem("11:00 - 12:00 AM", "Data Structure", "Prof. Name · Room", false, false));
-        classes.add(new ClassItem("11:00 - 12:00 PM", "DBMS Lab", "Prof. Name · Room", false, true));
-        classes.add(new ClassItem("11:00 - 12:00 PM", "DBMS Lab", "Prof. Name · Room", false, false));
-
-        for (int i = 0; i < classes.size(); i++) {
-            addTimelineRow(classes.get(i), i == classes.size() - 1);
-        }
+        loadTodaysClasses();
 
         rootView.findViewById(R.id.tvSeeAll).setOnClickListener(v ->
-                Toast.makeText(getContext(), "See all classes - hook this up later", Toast.LENGTH_SHORT).show());
+                startActivity(new Intent(getContext(), TimetableActivity.class)));
+
+        rootView.findViewById(R.id.timetableEmptyPrompt).setOnClickListener(v ->
+                startActivity(new Intent(getContext(), TimetableActivity.class)));
 
         rootView.findViewById(R.id.cardSubjects).setOnClickListener(v -> {
             if (getActivity() != null) {
@@ -102,6 +95,13 @@ public class HomeFragment extends Fragment {
         });
 
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh in case the student just came back from uploading/editing their timetable.
+        if (rootView != null) loadTodaysClasses();
     }
 
     /** Pulls personal/academic/metrics straight from students/{uid} — no more
@@ -158,6 +158,82 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    /** Queries timetable_entries for today's dayIndex and renders them in the timeline,
+     *  replacing the old static placeholder list. */
+    private void loadTodaysClasses() {
+        String uid = FirebaseAuth.getInstance().getCurrentUser() != null
+                ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+        if (uid == null || rootView == null) {
+            showEmptyTimetableState();
+            return;
+        }
+
+        int todayIndex = TimeFormatUtil.todayDayIndex();
+
+        FirebaseFirestore.getInstance().collection("timetable_entries")
+                .whereEqualTo("studentId", uid)
+                .whereEqualTo("dayIndex", todayIndex)
+                .get()
+                .addOnSuccessListener(this::bindTodaysClasses)
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Couldn't load timetable", Toast.LENGTH_SHORT).show();
+                    showEmptyTimetableState();
+                });
+    }
+
+    private void bindTodaysClasses(QuerySnapshot snapshot) {
+        if (!isAdded() || rootView == null) return;
+
+        List<TimetableEntry> entries = new ArrayList<>();
+        for (QueryDocumentSnapshot doc : snapshot) {
+            TimetableEntry entry = new TimetableEntry();
+            entry.startTime = doc.getString("startTime");
+            entry.endTime = doc.getString("endTime");
+            entry.subjectName = doc.getString("subjectName");
+            entry.professorName = doc.getString("professorName");
+            entry.room = doc.getString("room");
+            entries.add(entry);
+        }
+
+        if (entries.isEmpty()) {
+            showEmptyTimetableState();
+            return;
+        }
+
+        entries.sort((a, b) -> a.startTime.compareTo(b.startTime));
+
+        String now = TimeFormatUtil.nowAsStorageTime();
+        List<ClassItem> classes = new ArrayList<>();
+        for (TimetableEntry e : entries) {
+            boolean isCurrent = e.startTime != null && e.endTime != null
+                    && now.compareTo(e.startTime) >= 0 && now.compareTo(e.endTime) < 0;
+
+            String meta = "";
+            if (e.professorName != null && !e.professorName.trim().isEmpty()) meta += e.professorName.trim();
+            if (e.room != null && !e.room.trim().isEmpty()) {
+                meta += meta.isEmpty() ? e.room.trim() : " · " + e.room.trim();
+            }
+
+            classes.add(new ClassItem(TimeFormatUtil.formatRange(e.startTime, e.endTime),
+                    e.subjectName != null ? e.subjectName : "", meta, isCurrent));
+        }
+
+        timelineContainer.removeAllViews();
+        timelineContainer.setVisibility(View.VISIBLE);
+        rootView.findViewById(R.id.timetableEmptyPrompt).setVisibility(View.GONE);
+
+        for (int i = 0; i < classes.size(); i++) {
+            addTimelineRow(classes.get(i), i == classes.size() - 1);
+        }
+    }
+
+    private void showEmptyTimetableState() {
+        if (rootView == null) return;
+        timelineContainer.removeAllViews();
+        timelineContainer.setVisibility(View.GONE);
+        rootView.findViewById(R.id.timetableEmptyPrompt).setVisibility(View.VISIBLE);
+    }
+
     private void addTimelineRow(ClassItem item, boolean isLast) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View row = inflater.inflate(R.layout.item_timeline_class, timelineContainer, false);
@@ -167,14 +243,15 @@ public class HomeFragment extends Fragment {
         TextView tvTime = row.findViewById(R.id.tvClassTime);
         TextView tvSubject = row.findViewById(R.id.tvClassSubject);
         TextView tvProfRoom = row.findViewById(R.id.tvClassProfRoom);
-        TextView tvNewBadge = row.findViewById(R.id.tvNewBadge);
+        TextView tvNowBadge = row.findViewById(R.id.tvNewBadge); // repurposed to show "NOW" for the current class
 
         dot.setBackgroundResource(item.isCurrent ? R.drawable.dot_filled_purple : R.drawable.dot_outline_purple);
         line.setVisibility(isLast ? View.INVISIBLE : View.VISIBLE);
         tvTime.setText(item.time);
         tvSubject.setText(item.subject);
         tvProfRoom.setText(item.professorRoom);
-        tvNewBadge.setVisibility(item.isNew ? View.VISIBLE : View.GONE);
+        tvNowBadge.setText("NOW");
+        tvNowBadge.setVisibility(item.isCurrent ? View.VISIBLE : View.GONE);
 
         timelineContainer.addView(row);
     }

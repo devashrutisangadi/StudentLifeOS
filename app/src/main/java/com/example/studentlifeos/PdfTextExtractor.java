@@ -2,6 +2,7 @@ package com.example.studentlifeos;
 
 import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
@@ -14,10 +15,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Downloads a PDF from a (Cloudinary) URL and pulls its plain text, entirely on-device —
- * no external API involved. Used by GenerateFlashcardsActivity so flashcard generation can
- * read the actual content of an attached PDF note, not just whatever short text the student
- * typed alongside it.
+ * Downloads or reads a PDF and pulls its plain text, entirely on-device — no external API
+ * involved. Two entry points:
+ *  - extractFromUrl: for a PDF already uploaded somewhere (e.g. a note's Cloudinary URL)
+ *  - extractFromUri: for a PDF the student just picked from their device (e.g. a timetable
+ *    upload, before/without ever being uploaded anywhere)
  *
  * Only works on text-based PDFs (typed/exported documents). A scanned PDF with no embedded
  * text layer will come back empty — that would need OCR, which is a separate, heavier
@@ -38,7 +40,12 @@ public class PdfTextExtractor {
         ensureInit(activity.getApplicationContext());
         executor.execute(() -> {
             try {
-                String text = doExtract(fileUrl);
+                String text = extractText(() -> {
+                    HttpURLConnection conn = (HttpURLConnection) new URL(fileUrl).openConnection();
+                    conn.setConnectTimeout(20000);
+                    conn.setReadTimeout(30000);
+                    return conn.getInputStream();
+                });
                 activity.runOnUiThread(() -> callback.onSuccess(text));
             } catch (Exception e) {
                 activity.runOnUiThread(() ->
@@ -47,19 +54,25 @@ public class PdfTextExtractor {
         });
     }
 
-    private static synchronized void ensureInit(Context appContext) {
-        if (!resourceLoaderInitialized) {
-            PDFBoxResourceLoader.init(appContext);
-            resourceLoaderInitialized = true;
-        }
+    public static void extractFromUri(Activity activity, Uri fileUri, ExtractCallback callback) {
+        ensureInit(activity.getApplicationContext());
+        executor.execute(() -> {
+            try {
+                String text = extractText(() -> activity.getContentResolver().openInputStream(fileUri));
+                activity.runOnUiThread(() -> callback.onSuccess(text));
+            } catch (Exception e) {
+                activity.runOnUiThread(() ->
+                        callback.onError(e.getMessage() != null ? e.getMessage() : "Couldn't read the PDF"));
+            }
+        });
     }
 
-    private static String doExtract(String fileUrl) throws Exception {
-        HttpURLConnection conn = (HttpURLConnection) new URL(fileUrl).openConnection();
-        conn.setConnectTimeout(20000);
-        conn.setReadTimeout(30000);
+    private interface StreamOpener {
+        InputStream open() throws Exception;
+    }
 
-        try (InputStream in = conn.getInputStream();
+    private static String extractText(StreamOpener opener) throws Exception {
+        try (InputStream in = opener.open();
              PDDocument document = PDDocument.load(in)) {
 
             String text = new PDFTextStripper().getText(document);
@@ -74,6 +87,13 @@ public class PdfTextExtractor {
                 text = text.substring(0, MAX_CHARS);
             }
             return text;
+        }
+    }
+
+    private static synchronized void ensureInit(Context appContext) {
+        if (!resourceLoaderInitialized) {
+            PDFBoxResourceLoader.init(appContext);
+            resourceLoaderInitialized = true;
         }
     }
 }
