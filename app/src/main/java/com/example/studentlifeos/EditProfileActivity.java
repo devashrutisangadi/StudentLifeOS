@@ -124,18 +124,27 @@ public class EditProfileActivity extends AppCompatActivity {
         String firstName = nameParts.length > 0 ? nameParts[0] : "";
         String lastName = nameParts.length > 1 ? nameParts[1] : "";
 
-        // Dot-path keys so this only touches the fields this form edits,
-        // leaving college/degree/dob/bloodGroup/enrollmentNumber etc. (and
-        // metrics like spiHistory/backlogs/overallAttendance) untouched.
+        // set(..., merge()) treats "a.b" keys as literal field names, NOT nested
+        // paths (only update() does that). So pass real nested maps instead;
+        // merge still keeps sibling fields (dob, bloodGroup, spiHistory, ...).
+        Map<String, Object> personal = new HashMap<>();
+        personal.put("firstName", firstName);
+        personal.put("lastName", lastName);
+        personal.put("phone", etContact.getText().toString().trim());
+
+        Map<String, Object> academic = new HashMap<>();
+        academic.put("branch", etBranch.getText().toString().trim());
+        academic.put("semester", semester);
+        academic.put("rollNumber", etRollNumber.getText().toString().trim());
+        academic.put("university", etUniversity.getText().toString().trim());
+
+        Map<String, Object> metrics = new HashMap<>();
+        metrics.put("cpi", cgpa);
+
         Map<String, Object> updates = new HashMap<>();
-        updates.put("personal.firstName", firstName);
-        updates.put("personal.lastName", lastName);
-        updates.put("personal.phone", etContact.getText().toString().trim());
-        updates.put("academic.branch", etBranch.getText().toString().trim());
-        updates.put("academic.semester", semester);
-        updates.put("academic.rollNumber", etRollNumber.getText().toString().trim());
-        updates.put("academic.university", etUniversity.getText().toString().trim());
-        updates.put("metrics.cpi", cgpa);
+        updates.put("personal", personal);
+        updates.put("academic", academic);
+        updates.put("metrics", metrics);
 
         db.collection("students").document(user.getUid())
                 .set(updates, com.google.firebase.firestore.SetOptions.merge())
