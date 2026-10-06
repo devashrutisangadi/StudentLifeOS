@@ -18,6 +18,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Map;
 
@@ -105,6 +106,11 @@ public class ProfileFragment extends Fragment {
         String firstName = personal != null && personal.get("firstName") != null ? personal.get("firstName").toString() : "";
         String lastName = personal != null && personal.get("lastName") != null ? personal.get("lastName").toString() : "";
         String fullName = (firstName + " " + lastName).trim();
+        String email = doc.getString("email");
+        if (email == null || email.trim().isEmpty()) {
+            FirebaseUser authUser = FirebaseAuth.getInstance().getCurrentUser();
+            email = authUser != null && authUser.getEmail() != null ? authUser.getEmail() : "—";
+        }
 
         String branch = academic != null && academic.get("branch") != null ? academic.get("branch").toString() : "—";
         Object semester = academic != null ? academic.get("semester") : null;
@@ -117,7 +123,7 @@ public class ProfileFragment extends Fragment {
         ((TextView) rootView.findViewById(R.id.tvBranchSem)).setText(branch + " · Sem " + (semester != null ? semester : "—"));
         ((TextView) rootView.findViewById(R.id.tvRollNumber)).setText(rollNumber);
         ((TextView) rootView.findViewById(R.id.tvCgpa)).setText(cpi != null ? String.valueOf(cpi) : "—");
-        ((TextView) rootView.findViewById(R.id.tvEmail)).setText(doc.getString("email"));
+        ((TextView) rootView.findViewById(R.id.tvEmail)).setText(email);
         ((TextView) rootView.findViewById(R.id.tvPhone)).setText(phone);
         ((TextView) rootView.findViewById(R.id.tvUniversity)).setText(university);
 
