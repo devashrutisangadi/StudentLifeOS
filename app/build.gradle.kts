@@ -25,6 +25,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GROQ_API_KEY", "\"${localProperties.getProperty("GROQ_API_KEY", "")}\"")
         buildConfigField("String", "GROQ_MODEL", "\"${localProperties.getProperty("GROQ_MODEL", "")}\"")
+        buildConfigField("String", "GROQ_VISION_MODEL", "\"${localProperties.getProperty("GROQ_VISION_MODEL", "")}\"")
     }
 
     buildTypes {

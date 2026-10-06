@@ -29,8 +29,15 @@ import java.util.Map;
  * editable review list before saving. Saving REPLACES any existing timetable entirely
  * (deletes old entries first) rather than appending, since this represents "my current
  * weekly schedule" as a whole, not an incremental addition.
+ *
+ * If the PDF has no extractable text layer (a scanned page or a photo saved as PDF — very
+ * common for timetables students photograph off a notice board), this automatically falls
+ * back to rendering the page as an image and reading it with a vision model instead of
+ * failing outright.
  */
 public class UploadTimetableActivity extends AppCompatActivity {
+
+    private static final int MAX_IMAGE_PAGES = 3;
 
     private ProgressBar progressBar;
     private TextView tvStatus;
@@ -73,7 +80,40 @@ public class UploadTimetableActivity extends AppCompatActivity {
 
             @Override
             public void onError(String message) {
-                showError("Couldn't read that PDF: " + message);
+                if (message != null && message.contains("No readable text found")) {
+                    // No text layer — likely a scanned page or a photo saved as PDF.
+                    // Fall back to reading it visually instead of failing outright.
+                    fallBackToImageExtraction(fileUri);
+                } else {
+                    showError("Couldn't read that PDF: " + message);
+                }
+            }
+        });
+    }
+
+    private void fallBackToImageExtraction(Uri fileUri) {
+        setLoadingState("This looks like a scanned or photographed PDF — reading it visually…");
+        PdfImageRenderer.renderPagesAsBase64(this, fileUri, MAX_IMAGE_PAGES, new PdfImageRenderer.RenderCallback() {
+            @Override
+            public void onSuccess(List<String> base64JpegImages) {
+                setLoadingState("Extracting your class schedule…");
+                GroqApiClient.generateTimetableFromImages(UploadTimetableActivity.this, base64JpegImages,
+                        new GroqApiClient.GenerateTimetableCallback() {
+                            @Override
+                            public void onSuccess(List<TimetableEntry> drafts) {
+                                showReview(drafts);
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                showError("Extraction failed: " + message);
+                            }
+                        });
+            }
+
+            @Override
+            public void onError(String message) {
+                showError("Couldn't read this PDF as an image either: " + message);
             }
         });
     }
@@ -142,7 +182,7 @@ public class UploadTimetableActivity extends AppCompatActivity {
     }
 
     private void deleteThenInsert(FirebaseFirestore db, QuerySnapshot existing, String uid,
-                                   List<TimetableEntry> selected) {
+                                  List<TimetableEntry> selected) {
         int existingCount = existing.size();
         int[] deletesRemaining = {existingCount};
 
