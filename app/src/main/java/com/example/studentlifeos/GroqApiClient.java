@@ -30,6 +30,14 @@ import java.util.concurrent.Executors;
  * swapped in local.properties without touching code. DEFAULT_MODEL is only a fallback for
  * when GROQ_MODEL isn't set.
  *
+ * NOTE on reasoning models: openai/gpt-oss-120b (the default model) is a *reasoning* model —
+ * its hidden chain-of-thought draws from the same max_tokens budget as the final answer.
+ * Without an explicit, generous max_tokens, a long input (like a full timetable PDF) can
+ * burn the whole default budget on reasoning and leave nothing for the actual JSON, which
+ * Groq then rejects with a 400 "json_validate_failed" and an empty failed_generation. We set
+ * both a larger max_tokens and reasoning_effort="low" below to avoid that — this task
+ * (structured extraction) doesn't benefit from deep reasoning anyway.
+ *
  * IMPORTANT — API key handling:
  * GROQ_API_KEY is read from BuildConfig, populated from local.properties at build time.
  * Never hardcode the key here. Note that any key baked into an APK via BuildConfig can be
@@ -44,6 +52,7 @@ public class GroqApiClient {
     // replacement after llama-3.3-70b-versatile was decommissioned Aug 16, 2026.
     private static final String DEFAULT_MODEL = "openai/gpt-oss-120b";
     private static final String API_URL = "https://api.groq.com/openai/v1/chat/completions";
+    private static final int MAX_TOKENS = 4096; // generous enough to cover reasoning + a full week's JSON
 
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -57,7 +66,7 @@ public class GroqApiClient {
     }
 
     public static void generateFlashcards(android.app.Activity activity, String unitTitle,
-                                           String noteContent, GenerateFlashcardsCallback callback) {
+                                          String noteContent, GenerateFlashcardsCallback callback) {
         executor.execute(() -> {
             try {
                 String prompt = "You are helping a student turn their class notes into flashcards.\n"
@@ -101,7 +110,7 @@ public class GroqApiClient {
     }
 
     public static void generateTimetable(android.app.Activity activity, String pdfText,
-                                          GenerateTimetableCallback callback) {
+                                         GenerateTimetableCallback callback) {
         executor.execute(() -> {
             try {
                 String prompt = "You are extracting a weekly class timetable from a student's uploaded PDF.\n\n"
@@ -166,6 +175,10 @@ public class GroqApiClient {
         }
     }
 
+    private static boolean isReasoningModel(String model) {
+        return model != null && (model.contains("gpt-oss") || model.contains("qwen"));
+    }
+
     /**
      * Sends a prompt to Groq in JSON-object response mode and returns the parsed JSON object
      * the model replied with. The prompt must itself specify the exact JSON shape wanted, and
@@ -184,6 +197,12 @@ public class GroqApiClient {
         body.put("messages", new JSONArray().put(message));
         body.put("response_format", new JSONObject().put("type", "json_object"));
         body.put("temperature", 0.3);
+        body.put("max_tokens", MAX_TOKENS);
+        if (isReasoningModel(model)) {
+            // Keep the budget for the actual JSON answer, not hidden chain-of-thought —
+            // this is a straightforward extraction task, not one that needs deep reasoning.
+            body.put("reasoning_effort", "low");
+        }
 
         HttpURLConnection conn = (HttpURLConnection) new URL(API_URL).openConnection();
         conn.setRequestMethod("POST");
@@ -207,6 +226,10 @@ public class GroqApiClient {
         if (status == 404 && responseText.contains("model_not_found")) {
             throw new RuntimeException("Model \"" + model + "\" isn't available on Groq anymore — "
                     + "update GROQ_MODEL in local.properties. Check console.groq.com/docs/deprecations");
+        }
+        if (status == 400 && responseText.contains("json_validate_failed")) {
+            throw new RuntimeException("The model ran out of room to finish its answer (common on longer "
+                    + "documents) — try again, or try a shorter/cleaner PDF export");
         }
         if (status < 200 || status >= 300) {
             throw new RuntimeException("API error (" + status + "): " + responseText);
