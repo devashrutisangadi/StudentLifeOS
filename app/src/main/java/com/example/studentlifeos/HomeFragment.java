@@ -47,7 +47,7 @@ public class HomeFragment extends Fragment {
         rootView = inflater.inflate(R.layout.fragment_home, container, false);
         timelineContainer = rootView.findViewById(R.id.timelineContainer);
 
-        loadStudentData();
+        loadStudentDataAndLifeScore();
         loadTodaysClasses();
 
         rootView.findViewById(R.id.tvSeeAll).setOnClickListener(v ->
@@ -55,6 +55,9 @@ public class HomeFragment extends Fragment {
 
         rootView.findViewById(R.id.timetableEmptyPrompt).setOnClickListener(v ->
                 startActivity(new Intent(getContext(), TimetableActivity.class)));
+
+        rootView.findViewById(R.id.cardLifeScore).setOnClickListener(v ->
+                startActivity(new Intent(getContext(), LifeScoreActivity.class)));
 
         rootView.findViewById(R.id.cardSubjects).setOnClickListener(v -> {
             if (getActivity() != null) {
@@ -100,20 +103,27 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Refresh in case the student just came back from uploading/editing their timetable.
-        if (rootView != null) loadTodaysClasses();
+        // Refresh in case the student just came back from uploading/editing their timetable,
+        // marking syllabus units complete, updating attendance, or editing their profile —
+        // all of which feed into the Life Score too.
+        if (rootView != null) {
+            loadTodaysClasses();
+            loadStudentDataAndLifeScore();
+        }
     }
 
-    /** Pulls personal/academic/metrics straight from students/{uid} — no more
-     *  fan-out through enrollments+subjects needed; totalCreditsEarned and
-     *  overallAttendance are now real, direct fields. */
-    private void loadStudentData() {
+    /** Pulls personal/academic/metrics straight from students/{uid}, binds the stats card,
+     *  then kicks off the Life Score computation (which needs an extra subjects query). */
+    private void loadStudentDataAndLifeScore() {
         String uid = FirebaseAuth.getInstance().getCurrentUser() != null
                 ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
         if (uid == null || rootView == null) return;
 
         FirebaseFirestore.getInstance().collection("students").document(uid).get()
-                .addOnSuccessListener(this::bindStudentData)
+                .addOnSuccessListener(doc -> {
+                    bindStudentData(doc);
+                    loadLifeScore(uid, doc);
+                })
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Couldn't load dashboard data", Toast.LENGTH_SHORT).show());
     }
@@ -156,6 +166,32 @@ public class HomeFragment extends Fragment {
                     + (last.isEmpty() ? "" : last.charAt(0) + "");
             tvAvatarInitials.setText(initials.isEmpty() ? "?" : initials.toUpperCase());
         }
+    }
+
+    /** Computes and binds the Life Score card. Needs one more query (subjects, for syllabus
+     *  completion %) beyond what bindStudentData already fetched. */
+    @SuppressWarnings("unchecked")
+    private void loadLifeScore(String uid, DocumentSnapshot studentDoc) {
+        Map<String, Object> metrics = (Map<String, Object>) studentDoc.get("metrics");
+        Double attendance = metrics != null ? LifeScoreUtil.toDouble(metrics.get("overallAttendance")) : null;
+        Double cgpa = metrics != null ? LifeScoreUtil.toDouble(metrics.get("cpi")) : null;
+
+        FirebaseFirestore.getInstance().collection("subjects")
+                .whereEqualTo("studentId", uid)
+                .get()
+                .addOnSuccessListener(subjectsSnapshot -> {
+                    double syllabusPercent = LifeScoreUtil.averageProgress(subjectsSnapshot);
+                    bindLifeScoreCard(LifeScoreCalculator.compute(attendance, syllabusPercent, cgpa));
+                })
+                .addOnFailureListener(e ->
+                        bindLifeScoreCard(LifeScoreCalculator.compute(attendance, 0.0, cgpa)));
+    }
+
+    private void bindLifeScoreCard(LifeScoreCalculator.Breakdown breakdown) {
+        if (!isAdded() || rootView == null) return;
+        ((TextView) rootView.findViewById(R.id.tvLifeScoreValue)).setText(String.valueOf(breakdown.score));
+        ((TextView) rootView.findViewById(R.id.tvLifeScoreSubtitle))
+                .setText(LifeScoreCalculator.label(breakdown.score) + " · tap for breakdown");
     }
 
     /** Queries timetable_entries for today's dayIndex and renders them in the timeline,
