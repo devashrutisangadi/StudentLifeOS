@@ -62,19 +62,19 @@ public class LifeScoreActivity extends AppCompatActivity {
     @SuppressWarnings("unchecked")
     private void loadSyllabusAndCompute(String uid, DocumentSnapshot studentDoc) {
         Map<String, Object> metrics = (Map<String, Object>) studentDoc.get("metrics");
-        Double attendance = metrics != null ? LifeScoreUtil.toDouble(metrics.get("overallAttendance")) : null;
         Double cgpa = metrics != null ? LifeScoreUtil.toDouble(metrics.get("cpi")) : null;
 
-        FirebaseFirestore.getInstance().collection("subjects")
-                .whereEqualTo("studentId", uid)
-                .get()
-                .addOnSuccessListener(subjectsSnapshot -> {
-                    Double syllabusPercent = LifeScoreUtil.averageProgress(subjectsSnapshot);
-                    bindScore(LifeScoreCalculator.compute(attendance, syllabusPercent, cgpa));
-                })
-                .addOnFailureListener(e ->
-                        // Still show a score from what we have rather than blocking entirely.
-                        bindScore(LifeScoreCalculator.compute(attendance, 0.0, cgpa)));
+        AttendanceStats.loadOverall(uid, attendance ->
+                FirebaseFirestore.getInstance().collection("subjects")
+                        .whereEqualTo("studentId", uid)
+                        .get()
+                        .addOnSuccessListener(subjectsSnapshot -> {
+                            Double syllabusPercent = LifeScoreUtil.averageProgress(subjectsSnapshot);
+                            bindScore(LifeScoreCalculator.compute(attendance, syllabusPercent, cgpa));
+                        })
+                        .addOnFailureListener(e ->
+                                // Still show a score from what we have rather than blocking entirely.
+                                bindScore(LifeScoreCalculator.compute(attendance, 0.0, cgpa))));
     }
 
     private void bindScore(LifeScoreCalculator.Breakdown b) {

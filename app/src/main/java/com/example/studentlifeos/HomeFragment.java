@@ -122,7 +122,12 @@ public class HomeFragment extends Fragment {
         FirebaseFirestore.getInstance().collection("students").document(uid).get()
                 .addOnSuccessListener(doc -> {
                     bindStudentData(doc);
-                    loadLifeScore(uid, doc);
+                    AttendanceStats.loadOverall(uid, pct -> {
+                        if (!isAdded() || rootView == null) return;
+                        ((TextView) rootView.findViewById(R.id.tvAttendanceValue))
+                                .setText(pct != null ? Math.round(pct) + "%" : "—");
+                        loadLifeScore(uid, doc, pct);
+                    });
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Couldn't load dashboard data", Toast.LENGTH_SHORT).show());
@@ -153,9 +158,6 @@ public class HomeFragment extends Fragment {
         Object cpi = metrics != null ? metrics.get("cpi") : null;
         tvCgpaValue.setText(cpi != null ? String.valueOf(cpi) : "—");
 
-        Object attendance = metrics != null ? metrics.get("overallAttendance") : null;
-        tvAttendanceValue.setText(attendance != null ? (attendance + "%") : "—");
-
         Object credits = metrics != null ? metrics.get("totalCreditsEarned") : null;
         tvCreditsValue.setText(credits != null ? String.valueOf(credits) : "—");
 
@@ -171,9 +173,8 @@ public class HomeFragment extends Fragment {
     /** Computes and binds the Life Score card. Needs one more query (subjects, for syllabus
      *  completion %) beyond what bindStudentData already fetched. */
     @SuppressWarnings("unchecked")
-    private void loadLifeScore(String uid, DocumentSnapshot studentDoc) {
+    private void loadLifeScore(String uid, DocumentSnapshot studentDoc, Double attendance) {
         Map<String, Object> metrics = (Map<String, Object>) studentDoc.get("metrics");
-        Double attendance = metrics != null ? LifeScoreUtil.toDouble(metrics.get("overallAttendance")) : null;
         Double cgpa = metrics != null ? LifeScoreUtil.toDouble(metrics.get("cpi")) : null;
 
         FirebaseFirestore.getInstance().collection("subjects")
