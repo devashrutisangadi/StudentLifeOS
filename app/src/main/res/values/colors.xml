@@ -107,11 +107,11 @@
     <color name="papers_card_border">#40B8A8E8</color>
     <color name="papers_card_title">#2E2A47</color>
 
+    <!-- Button text colours (reuse existing colours) -->
+    <color name="on_peach_button">@color/text_dark</color>
+    <color name="on_purple_pill">@color/white</color>
 
 
-    <color name="cherry_bossom_pink">#ffb7c5</color>
-
-    <color name="outline">#B09080</color>
     <color name="outline_variant">#D4C4B8</color>
 
     <color name="error">#c41e3a</color>
@@ -209,8 +209,6 @@
     <color name="chip_on_selected">#F5F1EA</color>
     <color name="dark_chip_selected_surface">#E8C4A8</color>
 
-    <color name="divider">#D4C4B8</color>
-    <color name="dark_divider">#4A3028</color>
 
     <color name="transparent">#00000000</color>
     <color name="black">#FF000000</color>
