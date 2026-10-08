@@ -7,20 +7,23 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
-import io.noties.markwon.Markwon;
+import java.util.ArrayList;
+import java.util.List;
 
+/** Lists ALL notes (text and/or PDFs) for one syllabus unit. Tap to open, long-press to delete. */
 public class NotesActivity extends AppCompatActivity {
 
-    private Markwon markwon;
     private String unitId, unitTitle;
-    private String currentNoteId, currentMarkdown, currentFileId;
+    private final List<NoteItem> notes = new ArrayList<>();
+    private NoteAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,13 +36,11 @@ public class NotesActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tvUnitTitleHeader)).setText(unitTitle != null ? unitTitle : "Notes");
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
-        findViewById(R.id.btnEditNote).setOnClickListener(v -> {
+        // "+" always starts a NEW note (no noteId passed)
+        findViewById(R.id.btnAddNote).setOnClickListener(v -> {
             Intent intent = new Intent(this, EditNoteActivity.class);
             intent.putExtra("unitId", unitId);
             intent.putExtra("unitTitle", unitTitle);
-            intent.putExtra("noteId", currentNoteId);
-            intent.putExtra("fileId", currentFileId);
-            intent.putExtra("markdownContent", currentMarkdown);
             startActivity(intent);
         });
 
@@ -50,90 +51,104 @@ public class NotesActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        markwon = Markwon.create(this);
+        RecyclerView rv = findViewById(R.id.rvNotes);
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new NoteAdapter(notes, new NoteAdapter.Listener() {
+            @Override public void onClick(NoteItem note) { openNote(note); }
+            @Override public void onLongClick(NoteItem note) { confirmDelete(note); }
+        });
+        rv.setAdapter(adapter);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadNote(unitId); // refresh in case we just came back from editing
+        loadNotes(); // refresh after adding/editing/deleting
     }
 
-    private void loadNote(String unitId) {
+    private void loadNotes() {
         String uid = FirebaseAuth.getInstance().getCurrentUser() != null
                 ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
         if (unitId == null || uid == null) {
-            showEmptyState();
+            showList();
             return;
         }
 
         FirebaseFirestore.getInstance().collection("notes")
                 .whereEqualTo("unitId", unitId)
                 .whereEqualTo("studentId", uid)
-                .limit(1)
                 .get()
-                .addOnSuccessListener(this::bindNote)
+                .addOnSuccessListener(snapshot -> {
+                    notes.clear();
+                    snapshot.getDocuments().forEach(d -> notes.add(NoteItem.fromDoc(d)));
+
+                    // newest first; notes without a createdAt (older data) go last
+                    notes.sort((a, b) -> {
+                        if (a.createdAt == null && b.createdAt == null) return 0;
+                        if (a.createdAt == null) return 1;
+                        if (b.createdAt == null) return -1;
+                        return b.createdAt.compareTo(a.createdAt);
+                    });
+
+                    showList();
+                    for (NoteItem n : notes) {
+                        n.loadFileInfoIfNeeded(() -> adapter.notifyDataSetChanged());
+                    }
+                })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Couldn't load notes: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    showEmptyState();
+                    showList();
                 });
     }
 
-    private void bindNote(QuerySnapshot snapshot) {
-        if (snapshot.isEmpty()) {
-            currentNoteId = null;
-            currentMarkdown = null;
-            currentFileId = null;
-            showEmptyState();
+    private void showList() {
+        adapter.notifyDataSetChanged();
+        findViewById(R.id.tvEmptyState).setVisibility(notes.isEmpty() ? View.VISIBLE : View.GONE);
+        findViewById(R.id.rvNotes).setVisibility(notes.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    /** Text notes open in the viewer; a PDF/file-only entry opens the file straight away. */
+    private void openNote(NoteItem note) {
+        if (!note.hasText() && note.hasFile()) {
+            openAttachment(note);
             return;
         }
+        Intent intent = new Intent(this, NoteViewActivity.class);
+        intent.putExtra("noteId", note.id);
+        intent.putExtra("unitId", unitId);
+        intent.putExtra("unitTitle", unitTitle);
+        startActivity(intent);
+    }
 
-        DocumentSnapshot doc = snapshot.getDocuments().get(0);
-        currentNoteId = doc.getId();
-        currentMarkdown = doc.getString("markdownContent");
-        currentFileId = doc.getString("fileId");
-
-        TextView tvContent = findViewById(R.id.tvNoteContent);
-        findViewById(R.id.tvEmptyState).setVisibility(View.GONE);
-        tvContent.setVisibility(View.VISIBLE);
-
-        markwon.setMarkdown(tvContent, currentMarkdown != null ? currentMarkdown : "_No content available._");
-
-        findViewById(R.id.tvAttachment).setVisibility(View.GONE);
-        if (currentFileId != null) {
-            loadAttachment(currentFileId);
+    private void openAttachment(NoteItem note) {
+        if (note.fileUrl == null) {
+            // Dataset-imported placeholder metadata: no real file behind it
+            Toast.makeText(this, "This is sample data from the imported dataset — no real file attached",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(note.fileUrl)));
+        } catch (Exception e) {
+            Toast.makeText(this, "No app available to open this file", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void loadAttachment(String fileId) {
-        FirebaseFirestore.getInstance().collection("uploaded_files").document(fileId).get()
-                .addOnSuccessListener(doc -> {
-                    if (!doc.exists()) return;
-                    String fileName = doc.getString("fileName");
-                    String fileType = doc.getString("fileType");
-                    String fileUrl = doc.getString("fileUrl"); // only present on real uploads
-
-                    TextView tvAttachment = findViewById(R.id.tvAttachment);
-                    tvAttachment.setVisibility(View.VISIBLE);
-                    tvAttachment.setText("📎 " + (fileName != null ? fileName : "attachment")
-                            + (fileType != null ? " (" + fileType + ")" : ""));
-
-                    if (fileUrl != null) {
-                        tvAttachment.setOnClickListener(v -> {
-                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(fileUrl));
-                            startActivity(intent);
-                        });
-                    } else {
-                        // Dataset-imported placeholder metadata — no real file behind it
-                        tvAttachment.setOnClickListener(v ->
-                                Toast.makeText(this, "This is sample data from the imported dataset — no real file attached",
-                                        Toast.LENGTH_LONG).show());
-                    }
-                });
-    }
-
-    private void showEmptyState() {
-        findViewById(R.id.tvNoteContent).setVisibility(View.GONE);
-        findViewById(R.id.tvEmptyState).setVisibility(View.VISIBLE);
+    private void confirmDelete(NoteItem note) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete note?")
+                .setMessage("\"" + note.displayTitle() + "\" will be removed.")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Delete", (d, w) ->
+                        FirebaseFirestore.getInstance().collection("notes").document(note.id).delete()
+                                .addOnSuccessListener(unused -> {
+                                    notes.remove(note);
+                                    showList();
+                                    Toast.makeText(this, "Note deleted", Toast.LENGTH_SHORT).show();
+                                })
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(this, "Couldn't delete: " + e.getMessage(),
+                                                Toast.LENGTH_SHORT).show()))
+                .show();
     }
 }

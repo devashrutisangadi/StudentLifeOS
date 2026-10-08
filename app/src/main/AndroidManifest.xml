@@ -46,6 +46,7 @@
         <activity android:name=".AddTimetableEntryActivity" android:exported="false"/>
         <activity android:name=".UploadTimetableActivity" android:exported="false"/>
         <activity android:name=".LifeScoreActivity" android:exported="false"/>
+        <activity android:name=".NoteViewActivity" android:exported="false" />
 
 
     </application>

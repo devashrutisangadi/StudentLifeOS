@@ -21,62 +21,56 @@
             android:focusable="true" />
 
         <TextView
-            android:id="@+id/tvUnitTitleHeader"
+            android:id="@+id/tvNoteTitleHeader"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="12dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:textColor="@color/text_dark"
             android:textStyle="bold"
             android:textSize="16sp" />
 
         <ImageView
-            android:id="@+id/btnAddNote"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:id="@+id/btnEditNote"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:layout_marginStart="12dp"
-            android:src="@drawable/ic_plus"
-            android:tint="@color/text_dark"
+            android:src="@android:drawable/ic_menu_edit"
             android:clickable="true"
             android:focusable="true"
-            android:contentDescription="Add note" />
-
-        <TextView
-            android:id="@+id/btnOpenFlashcards"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
-            android:background="@drawable/bg_pill_purple"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="6dp"
-            android:text="Flashcards"
-            android:textColor="@color/white"
-            android:textSize="12sp"
-            android:clickable="true"
-            android:focusable="true" />
+            android:contentDescription="Edit note" />
     </LinearLayout>
 
-    <FrameLayout
+    <TextView
+        android:id="@+id/tvAttachment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/bg_stat_card"
+        android:padding="12dp"
+        android:textColor="@color/text_dark"
+        android:textSize="13sp"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone" />
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvNotes"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:padding="16dp" />
+        android:layout_weight="1"
+        android:padding="16dp">
 
         <TextView
-            android:id="@+id/tvEmptyState"
+            android:id="@+id/tvNoteContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="No notes for this unit yet.\nTap + to add a note or upload a PDF."
-            android:textColor="@color/hint_gray"
+            android:textColor="@color/text_dark"
             android:textSize="14sp"
-            android:gravity="center"
-            android:paddingTop="40dp"
+            android:lineSpacingExtra="4dp"
+            android:textIsSelectable="true"
             android:visibility="gone" />
-    </FrameLayout>
+    </ScrollView>
 </LinearLayout>

@@ -39,11 +39,24 @@
         </LinearLayout>
 
         <EditText
+            android:id="@+id/etNoteTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_edittext_signup"
+            android:hint="Title (optional)"
+            android:inputType="textCapSentences"
+            android:maxLines="1"
+            android:padding="14dp"
+            android:textColorHint="@color/hint_gray"
+            android:textSize="14sp" />
+
+        <EditText
             android:id="@+id/etMarkdownContent"
             android:layout_width="match_parent"
-            android:layout_height="280dp"
+            android:layout_height="240dp"
             android:background="@drawable/bg_edittext_signup"
-            android:hint="Write your notes here (supports markdown: # headers, **bold**, - lists, etc.)"
+            android:hint="Write your notes here (optional if you attach a PDF). Supports markdown: # headers, **bold**, - lists"
             android:gravity="top|start"
             android:padding="14dp"
             android:inputType="textMultiLine"
