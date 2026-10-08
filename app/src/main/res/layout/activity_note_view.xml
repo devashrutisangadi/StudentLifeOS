@@ -33,6 +33,17 @@
             android:textSize="16sp" />
 
         <ImageView
+            android:id="@+id/btnDeleteNote"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="12dp"
+            android:src="@drawable/ic_delete"
+            android:tint="@color/text_dark"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="Delete note" />
+
+        <ImageView
             android:id="@+id/btnEditNote"
             android:layout_width="22dp"
             android:layout_height="22dp"

@@ -31,6 +31,9 @@ public class NoteViewActivity extends AppCompatActivity {
         markwon = Markwon.create(this);
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        findViewById(R.id.btnDeleteNote).setOnClickListener(v -> {
+            if (current != null) NoteDeleter.confirmAndDelete(this, current, this::finish);
+        });
 
         findViewById(R.id.btnEditNote).setOnClickListener(v -> {
             if (current == null) return;

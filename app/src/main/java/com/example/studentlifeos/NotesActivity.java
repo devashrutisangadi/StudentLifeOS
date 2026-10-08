@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -55,7 +54,7 @@ public class NotesActivity extends AppCompatActivity {
         rv.setLayoutManager(new LinearLayoutManager(this));
         adapter = new NoteAdapter(notes, new NoteAdapter.Listener() {
             @Override public void onClick(NoteItem note) { openNote(note); }
-            @Override public void onLongClick(NoteItem note) { confirmDelete(note); }
+            @Override public void onDelete(NoteItem note) { confirmDelete(note); }
         });
         rv.setAdapter(adapter);
     }
@@ -135,20 +134,9 @@ public class NotesActivity extends AppCompatActivity {
     }
 
     private void confirmDelete(NoteItem note) {
-        new AlertDialog.Builder(this)
-                .setTitle("Delete note?")
-                .setMessage("\"" + note.displayTitle() + "\" will be removed.")
-                .setNegativeButton("Cancel", null)
-                .setPositiveButton("Delete", (d, w) ->
-                        FirebaseFirestore.getInstance().collection("notes").document(note.id).delete()
-                                .addOnSuccessListener(unused -> {
-                                    notes.remove(note);
-                                    showList();
-                                    Toast.makeText(this, "Note deleted", Toast.LENGTH_SHORT).show();
-                                })
-                                .addOnFailureListener(e ->
-                                        Toast.makeText(this, "Couldn't delete: " + e.getMessage(),
-                                                Toast.LENGTH_SHORT).show()))
-                .show();
+        NoteDeleter.confirmAndDelete(this, note, () -> {
+            notes.remove(note);
+            showList();
+        });
     }
 }

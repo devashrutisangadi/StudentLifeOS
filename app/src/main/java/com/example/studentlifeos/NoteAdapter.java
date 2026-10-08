@@ -14,7 +14,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.VH> {
 
     public interface Listener {
         void onClick(NoteItem note);
-        void onLongClick(NoteItem note);
+        void onDelete(NoteItem note);
     }
 
     private final List<NoteItem> items;
@@ -51,8 +51,9 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.VH> {
         }
 
         h.itemView.setOnClickListener(v -> listener.onClick(n));
+        h.btnDelete.setOnClickListener(v -> listener.onDelete(n));
         h.itemView.setOnLongClickListener(v -> {
-            listener.onLongClick(n);
+            listener.onDelete(n);
             return true;
         });
     }
@@ -64,12 +65,14 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.VH> {
 
     static class VH extends RecyclerView.ViewHolder {
         final TextView tvTitle, tvPreview, tvFile;
+        final View btnDelete;
 
         VH(@NonNull View itemView) {
             super(itemView);
             tvTitle = itemView.findViewById(R.id.tvNoteTitle);
             tvPreview = itemView.findViewById(R.id.tvNotePreview);
             tvFile = itemView.findViewById(R.id.tvNoteFile);
+            btnDelete = itemView.findViewById(R.id.btnDeleteNote);
         }
     }
 }
