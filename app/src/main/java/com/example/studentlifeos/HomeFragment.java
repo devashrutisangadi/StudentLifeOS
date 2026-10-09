@@ -177,17 +177,56 @@ public class HomeFragment extends Fragment {
                 .get()
                 .addOnSuccessListener(subjectsSnapshot -> {
                     double syllabusPercent = LifeScoreUtil.averageProgress(subjectsSnapshot);
-                    bindLifeScoreCard(LifeScoreCalculator.compute(attendance, syllabusPercent, cgpa));
+                    withSkills(uid, attendance, syllabusPercent, cgpa);
                 })
-                .addOnFailureListener(e ->
-                        bindLifeScoreCard(LifeScoreCalculator.compute(attendance, 0.0, cgpa)));
+                .addOnFailureListener(e -> withSkills(uid, attendance, 0.0, cgpa));
     }
+
+    private void withSkills(String uid, Double attendance, double syllabusPercent, Double cgpa) {
+        if (!isAdded()) return;
+        SkillsScoreLoader.load(requireContext(), uid, result -> {
+            if (!isAdded() || rootView == null) return;
+            bindLifeScoreCard(LifeScoreCalculator.compute(attendance, syllabusPercent, cgpa, result.readiness));
+            bindTopMatch(result);
+        });
+    }
+
+
 
     private void bindLifeScoreCard(LifeScoreCalculator.Breakdown breakdown) {
         if (!isAdded() || rootView == null) return;
         ((TextView) rootView.findViewById(R.id.tvLifeScoreValue)).setText(String.valueOf(breakdown.score));
         ((TextView) rootView.findViewById(R.id.tvLifeScoreSubtitle))
                 .setText(LifeScoreCalculator.label(breakdown.score) + " · tap for breakdown");
+    }
+
+    private void bindTopMatch(SkillsScoreLoader.Result result) {
+        ScoreRingView ring = rootView.findViewById(R.id.topMatchRing);
+        TextView label = rootView.findViewById(R.id.tvTopMatchLabel);
+        TextView title = rootView.findViewById(R.id.tvTopMatchTitle);
+        TextView meta = rootView.findViewById(R.id.tvTopMatchMeta);
+        View card = rootView.findViewById(R.id.cardTopMatch);
+        ring.setCenterColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_charcoal));
+
+        if (!result.hasSkills || result.top == null) {
+            ring.set(0, JobMatchAdapter.ringColor(MatchResult.Verdict.SKIP), "+");
+            label.setText("Internship matches");
+            title.setText("Find internships that fit you");
+            meta.setText("Add your skills to see your best match");
+            card.setOnClickListener(v -> startActivity(new Intent(getContext(), SkillsProfileActivity.class)));
+            return;
+        }
+
+        MatchResult top = result.top;
+        ring.set(top.score, JobMatchAdapter.ringColor(top.verdict), top.score + "%");
+        label.setText("Top internship match");
+        title.setText(top.job.title);
+        meta.setText(top.job.company + " · " + top.job.locationLabel());
+        card.setOnClickListener(v -> {
+            Intent i = new Intent(getContext(), JobDetailActivity.class);
+            i.putExtra(JobDetailActivity.EXTRA_JOB_ID, top.job.id);
+            startActivity(i);
+        });
     }
 
     /** Queries timetable_entries for today's dayIndex and renders them in the timeline,

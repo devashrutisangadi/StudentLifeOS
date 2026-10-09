@@ -43,6 +43,12 @@ public class ScoreRingView extends View {
         invalidate();
     }
 
+    /** Colour of the text in the middle (defaults to the theme's primary text colour). */
+    public void setCenterColor(int color) {
+        text.setColor(color);
+        invalidate();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         float size = Math.min(getWidth(), getHeight());
