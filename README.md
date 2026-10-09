@@ -78,7 +78,7 @@ in code. The internship data ships inside the app (`assets/jobs.json`).
   the skill catalogue and aliases. A dialog lets you untick anything you don't
   know before adding. Skills mentioned 3+ times start at Intermediate, the rest
   at Beginner.
-- **Internship intelligence:** 393 cleaned listings, scored 0–100 on the
+- **Internship intelligence:** 392 cleaned listings, scored 0–100 on the
   device. Fit is the share of required skills you have, weighted by level
   (Beginner 0.5, Intermediate 0.8, Advanced 1.0), half credit for closely related
   skills, +10 for your target role. Verdicts: Apply (70+), Wait (45–69),
