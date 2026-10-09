@@ -1,5 +1,6 @@
 package com.example.studentlifeos;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -14,6 +15,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -31,7 +34,7 @@ import java.util.Map;
 
 /**
  * "My skills": add skills (autocomplete from the skills the job listings use), set a level for each,
- * pick a target role, and tap suggestions drawn from the student's own subjects.
+ * pick a target role, tap suggestions drawn from the student's own subjects, or import skills from a CV (PDF).
  * Saved to students/{uid}.skills.
  */
 public class SkillsProfileActivity extends AppCompatActivity {
@@ -48,8 +51,14 @@ public class SkillsProfileActivity extends AppCompatActivity {
     private LinearLayout roleChips, skillsContainer, suggestionChips;
     private View suggestionsSection;
     private TextView tvSkillsTitle, tvEmpty;
-    private Button btnSave;
+    private Button btnSave, btnImportCv;
     private ProgressBar progress;
+    private boolean importing = false;
+
+    private final ActivityResultLauncher<String> cvPickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri != null) importCv(uri);
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +79,7 @@ public class SkillsProfileActivity extends AppCompatActivity {
         tvSkillsTitle = findViewById(R.id.tvSkillsTitle);
         tvEmpty = findViewById(R.id.tvEmptySkills);
         btnSave = findViewById(R.id.btnSaveSkills);
+        btnImportCv = findViewById(R.id.btnImportCv);
         progress = findViewById(R.id.skillsProgress);
 
         btnSave.setEnabled(false);
@@ -86,6 +96,7 @@ public class SkillsProfileActivity extends AppCompatActivity {
             return false;
         });
         btnSave.setOnClickListener(v -> save());
+        btnImportCv.setOnClickListener(v -> cvPickerLauncher.launch("application/pdf"));
 
         JobRepository.load(this, new JobRepository.Callback() {
             @Override public void onLoaded(JobRepository r) {
@@ -130,12 +141,14 @@ public class SkillsProfileActivity extends AppCompatActivity {
                 profile.replaceWith(p);
                 progress.setVisibility(View.GONE);
                 btnSave.setEnabled(true);
+                btnImportCv.setEnabled(true);
                 render();
                 loadSuggestions();
             }
             @Override public void onError(Exception e) {
                 progress.setVisibility(View.GONE);
                 btnSave.setEnabled(true); // allow starting fresh, but warn
+                btnImportCv.setEnabled(true);
                 Toast.makeText(SkillsProfileActivity.this,
                         "Couldn't load your saved skills: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 render();
@@ -157,14 +170,118 @@ public class SkillsProfileActivity extends AppCompatActivity {
                     if (t != null) texts.add(t);
                 }
             }
-            List<String> technical = new ArrayList<>();
-            for (JobRepository.SkillInfo s : repo.getSkillCatalog()) {
-                if ("technical".equals(s.kind)) technical.add(s.name);
-            }
             suggestions.clear();
-            suggestions.addAll(SkillSuggester.suggest(texts, technical, profile.keys(), 10));
+            suggestions.addAll(SkillSuggester.suggest(texts, technicalCatalog(), profile.keys(), 10));
             renderSuggestions();
         }); // suggestions are a nicety: if this fails the section just stays hidden
+    }
+
+    /** Canonical technical skill names, most common first. */
+    private List<String> technicalCatalog() {
+        List<String> technical = new ArrayList<>();
+        for (JobRepository.SkillInfo s : repo.getSkillCatalog()) {
+            if ("technical".equals(s.kind)) technical.add(s.name);
+        }
+        return technical;
+    }
+
+    // ------------------------------------------------------------------ CV import
+
+    /** Reads the picked PDF on the device, finds the skills in it and lets the student choose which to add. */
+    private void importCv(Uri uri) {
+        if (repo == null || importing) return;
+        setImporting(true);
+        PdfTextExtractor.extractFromUri(this, uri, new PdfTextExtractor.ExtractCallback() {
+            @Override public void onSuccess(String text) {
+                if (isFinishing() || isDestroyed()) return;
+                setImporting(false);
+                CvSkillExtractor.Result result = CvSkillExtractor.extract(text, technicalCatalog(),
+                        repo.getNormalizer().getAliases(), profile.keys());
+                showCvReview(result);
+            }
+            @Override public void onError(String message) {
+                if (isFinishing() || isDestroyed()) return;
+                setImporting(false);
+                boolean scanned = message != null && message.contains("No readable text found");
+                new AlertDialog.Builder(SkillsProfileActivity.this)
+                        .setTitle("Couldn't read that CV")
+                        .setMessage(scanned
+                                ? "This PDF looks like a scan or a photo, so there's no text to read. "
+                                + "Export your CV as a PDF from Word or Google Docs and try again."
+                                : "Something went wrong reading the file: " + message)
+                        .setPositiveButton("OK", null)
+                        .show();
+            }
+        });
+    }
+
+    private void setImporting(boolean on) {
+        importing = on;
+        btnImportCv.setEnabled(!on);
+        btnImportCv.setText(on ? "Reading your CV…" : "Choose CV (PDF)");
+        progress.setVisibility(on ? View.VISIBLE : View.GONE);
+    }
+
+    private void showCvReview(CvSkillExtractor.Result result) {
+        List<CvSkillExtractor.Found> found = result.fresh;
+        if (found.isEmpty()) {
+            new AlertDialog.Builder(this)
+                    .setTitle("No new skills found")
+                    .setMessage(result.alreadyHad > 0
+                            ? "Everything we recognised in your CV is already in your list."
+                            : "We didn't recognise any skills that internship listings ask for. "
+                            + "You can still add skills by hand.")
+                    .setPositiveButton("OK", null)
+                    .show();
+            return;
+        }
+
+        String[] labels = new String[found.size()];
+        boolean[] checked = new boolean[found.size()];
+        for (int i = 0; i < labels.length; i++) {
+            CvSkillExtractor.Found f = found.get(i);
+            labels[i] = f.mentions > 1 ? f.name + "  (" + f.mentions + " mentions)" : f.name;
+            checked[i] = true;
+        }
+
+        String intro = "Untick any you don't actually know. Skills mentioned 3+ times start at Intermediate, "
+                + "the rest at Beginner; you can change levels afterwards.";
+        if (result.alreadyHad > 0) intro += " " + result.alreadyHad + " more you already have.";
+
+        // setMessage() would hide the checkbox list, so the explanation lives in a custom title instead
+        LinearLayout header = new LinearLayout(this);
+        header.setOrientation(LinearLayout.VERTICAL);
+        header.setPadding(dp(24), dp(20), dp(24), dp(8));
+        TextView title = new TextView(this);
+        title.setText(found.size() + (found.size() == 1 ? " skill" : " skills") + " found in your CV");
+        title.setTextSize(18);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        title.setTextColor(ContextCompat.getColor(this, R.color.text_dark));
+        TextView sub = new TextView(this);
+        sub.setText(intro);
+        sub.setTextSize(13);
+        sub.setPadding(0, dp(6), 0, 0);
+        sub.setTextColor(ContextCompat.getColor(this, R.color.hint_gray));
+        header.addView(title);
+        header.addView(sub);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setCustomTitle(header)
+                .setMultiChoiceItems(labels, checked, (d, which, isChecked) -> checked[which] = isChecked)
+                .setPositiveButton("Add selected", (d, w) -> {
+                    int added = 0;
+                    for (int i = 0; i < checked.length; i++) {
+                        if (checked[i] && profile.add(found.get(i).name, found.get(i).suggestedLevel)) added++;
+                    }
+                    if (added == 0) return;
+                    dirty = true;
+                    render();
+                    Toast.makeText(this, added + (added == 1 ? " skill" : " skills")
+                            + " added. Tap Save skills to keep them.", Toast.LENGTH_LONG).show();
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
+        dialog.show();
     }
 
     // ------------------------------------------------------------------ actions

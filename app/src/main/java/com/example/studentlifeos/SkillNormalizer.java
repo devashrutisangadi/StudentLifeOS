@@ -30,6 +30,11 @@ public final class SkillNormalizer {
         }
     }
 
+    /** Read-only view of the alias table (lower-case alias -> canonical names), e.g. for scanning a CV. */
+    public Map<String, List<String>> getAliases() {
+        return java.util.Collections.unmodifiableMap(aliases);
+    }
+
     /** Lower-cases and collapses whitespace. */
     public static String key(String raw) {
         return raw == null ? "" : raw.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
