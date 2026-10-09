@@ -10,7 +10,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -154,7 +154,7 @@ public class UploadTimetableActivity extends AppCompatActivity {
             return;
         }
 
-        new AlertDialog.Builder(this)
+        new MaterialAlertDialogBuilder(this)
                 .setTitle("Replace your timetable?")
                 .setMessage("This will delete your current timetable and replace it with these "
                         + selected.size() + " classes.")

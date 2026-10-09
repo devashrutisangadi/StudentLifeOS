@@ -3,7 +3,7 @@ package com.example.studentlifeos;
 import android.content.Context;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -17,7 +17,7 @@ public final class NoteDeleter {
     private NoteDeleter() {}
 
     public static void confirmAndDelete(Context context, NoteItem note, Callback callback) {
-        new AlertDialog.Builder(context)
+        new MaterialAlertDialogBuilder(context)
                 .setTitle("Delete note?")
                 .setMessage("\"" + note.displayTitle() + "\" will be permanently removed"
                         + (note.hasFile() ? ", including its attached file link." : "."))

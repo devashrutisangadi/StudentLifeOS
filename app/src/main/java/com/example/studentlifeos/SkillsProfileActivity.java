@@ -1,5 +1,6 @@
 package com.example.studentlifeos;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -203,7 +204,7 @@ public class SkillsProfileActivity extends AppCompatActivity {
                 if (isFinishing() || isDestroyed()) return;
                 setImporting(false);
                 boolean scanned = message != null && message.contains("No readable text found");
-                new AlertDialog.Builder(SkillsProfileActivity.this)
+                new MaterialAlertDialogBuilder(SkillsProfileActivity.this)
                         .setTitle("Couldn't read that CV")
                         .setMessage(scanned
                                 ? "This PDF looks like a scan or a photo, so there's no text to read. "
@@ -225,7 +226,7 @@ public class SkillsProfileActivity extends AppCompatActivity {
     private void showCvReview(CvSkillExtractor.Result result) {
         List<CvSkillExtractor.Found> found = result.fresh;
         if (found.isEmpty()) {
-            new AlertDialog.Builder(this)
+            new MaterialAlertDialogBuilder(this)
                     .setTitle("No new skills found")
                     .setMessage(result.alreadyHad > 0
                             ? "Everything we recognised in your CV is already in your list."
@@ -256,16 +257,16 @@ public class SkillsProfileActivity extends AppCompatActivity {
         title.setText(found.size() + (found.size() == 1 ? " skill" : " skills") + " found in your CV");
         title.setTextSize(18);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
-        title.setTextColor(ContextCompat.getColor(this, R.color.text_dark));
+        title.setTextColor(ContextCompat.getColor(this, R.color.text_charcoal));
         TextView sub = new TextView(this);
         sub.setText(intro);
         sub.setTextSize(13);
         sub.setPadding(0, dp(6), 0, 0);
-        sub.setTextColor(ContextCompat.getColor(this, R.color.hint_gray));
+        sub.setTextColor(ContextCompat.getColor(this, R.color.text_gray));
         header.addView(title);
         header.addView(sub);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
                 .setCustomTitle(header)
                 .setMultiChoiceItems(labels, checked, (d, which, isChecked) -> checked[which] = isChecked)
                 .setPositiveButton("Add selected", (d, w) -> {
@@ -333,7 +334,7 @@ public class SkillsProfileActivity extends AppCompatActivity {
 
     private void confirmExit() {
         if (!dirty) { finish(); return; }
-        new AlertDialog.Builder(this)
+        new MaterialAlertDialogBuilder(this)
                 .setTitle("Discard changes?")
                 .setMessage("Your skill changes haven't been saved.")
                 .setPositiveButton("Discard", (d, w) -> finish())

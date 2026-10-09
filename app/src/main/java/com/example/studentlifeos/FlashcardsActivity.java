@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -100,7 +100,7 @@ public class FlashcardsActivity extends AppCompatActivity {
     }
 
     private void confirmDelete(FlashcardItem card) {
-        new AlertDialog.Builder(this)
+        new MaterialAlertDialogBuilder(this)
                 .setTitle("Delete flashcard?")
                 .setMessage("This can't be undone.")
                 .setPositiveButton("Delete", (dialog, which) -> deleteCard(card))

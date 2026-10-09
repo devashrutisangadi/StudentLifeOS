@@ -1,6 +1,6 @@
 package com.example.studentlifeos;
 
-import android.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -156,7 +156,7 @@ public class SubjectsFragment extends Fragment {
     }
 
     private void confirmAndDeleteSubject(SubjectAdapter.Subject subject) {
-        new AlertDialog.Builder(getContext())
+        new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Delete subject?")
                 .setMessage("This will also delete all of \"" + subject.name + "\"'s syllabus units. This can't be undone.")
                 .setPositiveButton("Delete", (dialog, which) -> deleteSubjectAndUnits(subject))

@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -90,7 +90,7 @@ public class JobDetailActivity extends AppCompatActivity {
         openedListing = false;
         TrackedJob t = tracker.get(jobId);
         if (currentJob == null || (t != null && t.hasApplied())) return;
-        new AlertDialog.Builder(this)
+        new MaterialAlertDialogBuilder(this)
                 .setTitle("Did you apply?")
                 .setMessage("Mark \"" + currentJob.title + "\" as applied so you can track it.")
                 .setPositiveButton("Yes, I applied", (d, w) -> changeStatus(TrackedJob.Status.APPLIED))
@@ -201,7 +201,7 @@ public class JobDetailActivity extends AppCompatActivity {
         if (t == null) {
             apply(tracker.save(jobId, System.currentTimeMillis()), null);
         } else if (t.hasApplied()) {
-            new AlertDialog.Builder(this)
+            new MaterialAlertDialogBuilder(this)
                     .setTitle("Remove from tracker?")
                     .setMessage("This listing is marked " + t.status.label().toLowerCase()
                             + ". Removing it deletes that history.")
@@ -233,7 +233,7 @@ public class JobDetailActivity extends AppCompatActivity {
         TrackedJob t = tracker.get(jobId);
         int checked = t == null ? -1 : t.status.ordinal();
         for (int i = 0; i < all.length; i++) labels[i] = all[i].label();
-        new AlertDialog.Builder(this)
+        new MaterialAlertDialogBuilder(this)
                 .setTitle("Application status")
                 .setSingleChoiceItems(labels, checked, (d, which) -> {
                     d.dismiss();

@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -139,7 +139,7 @@ public class PapersListActivity extends AppCompatActivity {
     }
 
     private void confirmAndDeletePaper(PaperAdapter.Paper paper) {
-        new AlertDialog.Builder(this)
+        new MaterialAlertDialogBuilder(this)
                 .setTitle("Delete paper?")
                 .setMessage("Remove \"" + paper.title + "\"? This can't be undone.")
                 .setPositiveButton("Delete", (dialog, which) -> {

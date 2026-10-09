@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="ThemeOverlay.StudentLifeOS.Dialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorPrimary">@color/purple_accent</item>
+        <item name="colorOnSurface">@color/text_charcoal</item>
+        <item name="colorOnSurfaceVariant">@color/text_gray</item>
+        <item name="colorSurfaceContainerHigh">@color/card_white</item>
+        <item name="colorControlActivated">@color/purple_accent</item>
+        <item name="alertDialogStyle">@style/MaterialAlertDialog.StudentLifeOS</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.StudentLifeOS.Title</item>
+    </style>
+
+    <style name="MaterialAlertDialog.StudentLifeOS" parent="MaterialAlertDialog.Material3">
+        <item name="shapeAppearance">@style/ShapeAppearance.StudentLifeOS.Dialog</item>
+        <item name="shapeAppearanceOverlay">@null</item>
+    </style>
+
+    <style name="MaterialAlertDialog.StudentLifeOS.Title" parent="MaterialAlertDialog.Material3.Title.Text">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ShapeAppearance.StudentLifeOS.Dialog" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">20dp</item>
+    </style>
+
+</resources>
