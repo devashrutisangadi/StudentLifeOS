@@ -28,6 +28,7 @@ public class JobMatchAdapter extends RecyclerView.Adapter<JobMatchAdapter.Holder
 
     private final List<MatchResult> items = new ArrayList<>();
     private final Listener listener;
+    private JobTracker tracker = new JobTracker();
 
     public JobMatchAdapter(Listener listener) {
         this.listener = listener;
@@ -36,6 +37,12 @@ public class JobMatchAdapter extends RecyclerView.Adapter<JobMatchAdapter.Holder
     public void submit(List<MatchResult> results) {
         items.clear();
         items.addAll(results);
+        notifyDataSetChanged();
+    }
+
+    /** Which listings the student has saved or applied to, shown as a small tag on each card. */
+    public void setTracker(JobTracker tracker) {
+        this.tracker = tracker == null ? new JobTracker() : tracker;
         notifyDataSetChanged();
     }
 
@@ -62,6 +69,14 @@ public class JobMatchAdapter extends RecyclerView.Adapter<JobMatchAdapter.Holder
         String pay = job.stipendShort();
         if (!pay.isEmpty()) meta.append(" · ").append(pay);
         h.meta.setText(meta);
+
+        TrackedJob tracked = tracker.get(job.id);
+        if (tracked == null) {
+            h.tracked.setVisibility(View.GONE);
+        } else {
+            h.tracked.setVisibility(View.VISIBLE);
+            TrackerUi.styleStatus(h.tracked, tracked.status);
+        }
 
         h.chips.removeAllViews();
         if (avoid) {
@@ -154,7 +169,7 @@ public class JobMatchAdapter extends RecyclerView.Adapter<JobMatchAdapter.Holder
 
     static class Holder extends RecyclerView.ViewHolder {
         final ScoreRingView ring;
-        final TextView title, verdict, company, meta, warning;
+        final TextView title, verdict, company, meta, warning, tracked;
         final ChipGroup chips;
 
         Holder(@NonNull View v) {
@@ -166,6 +181,7 @@ public class JobMatchAdapter extends RecyclerView.Adapter<JobMatchAdapter.Holder
             meta = v.findViewById(R.id.tvJobMeta);
             chips = v.findViewById(R.id.skillChips);
             warning = v.findViewById(R.id.tvWarning);
+            tracked = v.findViewById(R.id.tvTracked);
         }
     }
 }

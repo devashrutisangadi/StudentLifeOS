@@ -20,6 +20,22 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/btnTracker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_category_pill"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingStart="14dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="8dp"
+            android:text="Tracker"
+            android:textColor="@color/papers_category_text_inactive"
+            android:textSize="13sp" />
+
+        <TextView
             android:id="@+id/btnSkillGap"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -75,6 +75,8 @@ public class JobsFragment extends Fragment {
         View.OnClickListener openSkills = x ->
                 startActivity(new Intent(requireContext(), SkillsProfileActivity.class));
         v.findViewById(R.id.btnMySkills).setOnClickListener(openSkills);
+        v.findViewById(R.id.btnTracker).setOnClickListener(x ->
+                startActivity(new Intent(requireContext(), TrackerActivity.class)));
         v.findViewById(R.id.btnSkillGap).setOnClickListener(x ->
                 startActivity(new Intent(requireContext(), SkillGapActivity.class)));
         btnAddSkills.setOnClickListener(openSkills);
@@ -104,6 +106,7 @@ public class JobsFragment extends Fragment {
                         ranked = p.isEmpty() ? new ArrayList<>() : Matching.forRepo(repo).rank(p);
                         progress.setVisibility(View.GONE);
                         render();
+                        loadTracker(uid);
                     }
                     @Override public void onError(Exception e) {
                         if (!isAdded()) return;
@@ -119,6 +122,16 @@ public class JobsFragment extends Fragment {
                 Toast.makeText(getContext(), "Couldn't load job data: " + e.getMessage(),
                         Toast.LENGTH_LONG).show();
             }
+        });
+    }
+
+    /** The Saved / Applied tags on the cards. A nicety: if it fails the cards simply show no tag. */
+    private void loadTracker(String uid) {
+        TrackerStore.load(uid, new TrackerStore.LoadCallback() {
+            @Override public void onLoaded(JobTracker t) {
+                if (isAdded()) adapter.setTracker(t);
+            }
+            @Override public void onError(Exception e) {}
         });
     }
 

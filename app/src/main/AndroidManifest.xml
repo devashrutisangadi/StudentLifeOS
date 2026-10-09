@@ -52,6 +52,7 @@
         <activity android:name=".PapersActivity" android:exported="false" />
         <activity android:name=".LearningPlanActivity" android:exported="false" />
         <activity android:name=".SkillGapActivity" android:exported="false" />
+        <activity android:name=".TrackerActivity" android:exported="false" />
 
 
     </application>

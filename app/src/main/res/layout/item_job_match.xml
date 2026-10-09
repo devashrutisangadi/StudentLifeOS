@@ -69,6 +69,19 @@
             android:textColor="@color/subject_secondary_text"
             android:textSize="13sp" />
 
+        <TextView
+            android:id="@+id/tvTracked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingStart="10dp"
+            android:paddingTop="3dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="3dp"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/skillChips"
             android:layout_width="match_parent"

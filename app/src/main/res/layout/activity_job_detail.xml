@@ -200,6 +200,53 @@
             android:textSize="13sp"
             android:visibility="gone" />
 
+        <!-- tracker -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="YOUR APPLICATION"
+            android:textColor="@color/subject_secondary_text"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnSaveJob"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_button_outline"
+                android:text="Save"
+                android:textAllCaps="false"
+                android:textColor="@color/text_dark" />
+
+            <Button
+                android:id="@+id/btnJobStatus"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_button_outline"
+                android:text="Mark as applied"
+                android:textAllCaps="false"
+                android:textColor="@color/text_dark" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvTrackNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="@color/subject_secondary_text"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
         <Button
             android:id="@+id/btnOpenListing"
             android:layout_width="match_parent"
