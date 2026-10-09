@@ -137,6 +137,16 @@
                 android:layout_marginTop="8dp"
                 app:chipSpacingHorizontal="8dp"
                 app:chipSpacingVertical="8dp" />
+
+            <Button
+                android:id="@+id/btnLearningPlan"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_button_outline"
+                android:text="See learning plan"
+                android:textAllCaps="false"
+                android:textColor="@color/text_dark" />
         </LinearLayout>
 
         <!-- listing check -->

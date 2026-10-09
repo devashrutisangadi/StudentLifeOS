@@ -50,6 +50,8 @@
         <activity android:name=".SkillsProfileActivity" android:exported="false" />
         <activity android:name=".JobDetailActivity" android:exported="false" />
         <activity android:name=".PapersActivity" android:exported="false" />
+        <activity android:name=".LearningPlanActivity" android:exported="false" />
+        <activity android:name=".SkillGapActivity" android:exported="false" />
 
 
     </application>

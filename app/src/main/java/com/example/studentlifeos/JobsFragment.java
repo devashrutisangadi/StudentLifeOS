@@ -75,6 +75,8 @@ public class JobsFragment extends Fragment {
         View.OnClickListener openSkills = x ->
                 startActivity(new Intent(requireContext(), SkillsProfileActivity.class));
         v.findViewById(R.id.btnMySkills).setOnClickListener(openSkills);
+        v.findViewById(R.id.btnSkillGap).setOnClickListener(x ->
+                startActivity(new Intent(requireContext(), SkillGapActivity.class)));
         btnAddSkills.setOnClickListener(openSkills);
 
         renderFilterChips();

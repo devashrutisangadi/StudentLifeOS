@@ -88,6 +88,14 @@ public class JobDetailActivity extends AppCompatActivity {
         fillChips(R.id.haveSection, R.id.haveChips, r.matched, false, r);
         fillChips(R.id.missingSection, R.id.missingChips, r.missing, true, r);
 
+        findViewById(R.id.btnLearningPlan).setOnClickListener(v -> {
+            Intent plan = new Intent(this, LearningPlanActivity.class);
+            plan.putExtra(LearningPlanActivity.EXTRA_GOAL, "the " + job.title + " role at " + job.company);
+            plan.putExtra(LearningPlanActivity.EXTRA_SKILLS, r.missing.toArray(new String[0]));
+            plan.putExtra(LearningPlanActivity.EXTRA_CACHE_KEY, job.id);
+            startActivity(plan);
+        });
+
         StringBuilder check = new StringBuilder();
         if (r.warning != null) {
             check.append("⚠ ").append(r.warning);
