@@ -32,8 +32,8 @@ public class DashboardActivity extends AppCompatActivity {
             } else if (id == R.id.nav_subjects) {
                 loadFragment(new SubjectsFragment());
                 return true;
-            } else if (id == R.id.nav_papers) {
-                loadFragment(new PapersFragment());
+            } else if (id == R.id.nav_jobs) {
+                loadFragment(new JobsFragment());
                 return true;
             }
             return false;

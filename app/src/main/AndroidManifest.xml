@@ -48,6 +48,8 @@
         <activity android:name=".LifeScoreActivity" android:exported="false"/>
         <activity android:name=".NoteViewActivity" android:exported="false" />
         <activity android:name=".SkillsProfileActivity" android:exported="false" />
+        <activity android:name=".JobDetailActivity" android:exported="false" />
+        <activity android:name=".PapersActivity" android:exported="false" />
 
 
     </application>

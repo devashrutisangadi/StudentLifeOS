@@ -67,13 +67,8 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        rootView.findViewById(R.id.cardPyqPapers).setOnClickListener(v -> {
-            if (getActivity() != null) {
-                com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
-                        getActivity().findViewById(R.id.bottomNav);
-                bottomNav.setSelectedItemId(R.id.nav_papers);
-            }
-        });
+        rootView.findViewById(R.id.cardPyqPapers).setOnClickListener(v ->
+                startActivity(new android.content.Intent(getContext(), PapersActivity.class)));
         rootView.findViewById(R.id.cardNotesRepo).setOnClickListener(v -> {
             if (getActivity() != null) {
                 com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
