@@ -1,5 +1,6 @@
 package com.example.studentlifeos;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
@@ -10,6 +11,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.chip.ChipGroup;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +22,9 @@ public class JobMatchAdapter extends RecyclerView.Adapter<JobMatchAdapter.Holder
     public interface Listener {
         void onClick(MatchResult result);
     }
+
+    private static final int MAX_HAVE_CHIPS = 3;
+    private static final int MAX_MISSING_CHIPS = 3;
 
     private final List<MatchResult> items = new ArrayList<>();
     private final Listener listener;
@@ -45,36 +51,88 @@ public class JobMatchAdapter extends RecyclerView.Adapter<JobMatchAdapter.Holder
         Job job = r.job;
         boolean avoid = r.verdict == MatchResult.Verdict.AVOID;
 
-        h.score.setText(avoid ? "–" : r.score + "%");
+        if (avoid) h.ring.set(0, ringColor(r.verdict), "!");
+        else h.ring.set(r.score, ringColor(r.verdict), r.score + "%");
+
         h.title.setText(job.title);
         styleVerdict(h.verdict, r.verdict);
+        h.company.setText(job.company);
 
-        StringBuilder meta = new StringBuilder(job.company).append(" · ").append(job.locationLabel());
+        StringBuilder meta = new StringBuilder(job.locationLabel());
         String pay = job.stipendShort();
         if (!pay.isEmpty()) meta.append(" · ").append(pay);
         h.meta.setText(meta);
 
+        h.chips.removeAllViews();
         if (avoid) {
-            h.have.setVisibility(View.GONE);
-            h.missing.setVisibility(View.GONE);
+            h.chips.setVisibility(View.GONE);
             h.warning.setVisibility(View.VISIBLE);
             h.warning.setText(r.warning);
         } else {
             h.warning.setVisibility(View.GONE);
-            show(h.have, r.matched.isEmpty() ? null : "You have: " + MatchText.listWithMore(r.matched, 4));
-            show(h.missing, r.missing.isEmpty() ? null : "To learn: " + MatchText.listWithMore(r.missing, 3));
+            h.chips.setVisibility(View.VISIBLE);
+            Context c = h.itemView.getContext();
+            addChips(h.chips, c, r.matched, MAX_HAVE_CHIPS, true);
+            addChips(h.chips, c, r.missing, MAX_MISSING_CHIPS, false);
         }
         h.itemView.setOnClickListener(v -> listener.onClick(r));
     }
 
-    private static void show(TextView tv, String text) {
-        tv.setVisibility(text == null ? View.GONE : View.VISIBLE);
-        if (text != null) tv.setText(text);
+    /** Filled green "✓ Skill" chips for skills you have, outlined "+ Skill" chips for ones to learn. */
+    private static void addChips(ChipGroup group, Context c, List<String> skills, int max, boolean have) {
+        int shown = Math.min(max, skills.size());
+        for (int i = 0; i < shown; i++) group.addView(chip(c, (have ? "✓ " : "+ ") + skills.get(i), have));
+        if (skills.size() > shown) group.addView(more(c, "+" + (skills.size() - shown)));
+    }
+
+    private static TextView chip(Context c, String text, boolean have) {
+        TextView tv = baseChip(c, text);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(100f);
+        if (have) {
+            bg.setColor(Color.parseColor("#CDEBD3"));
+            tv.setTextColor(Color.parseColor("#1F5130"));
+        } else {
+            bg.setColor(Color.TRANSPARENT);
+            bg.setStroke(dp(c, 1), Color.parseColor("#9A94B0"));
+            tv.setTextColor(c.getColor(R.color.subject_secondary_text));
+        }
+        tv.setBackground(bg);
+        return tv;
+    }
+
+    private static TextView more(Context c, String text) {
+        TextView tv = baseChip(c, text);
+        tv.setTextColor(c.getColor(R.color.subject_secondary_text));
+        return tv;
+    }
+
+    private static TextView baseChip(Context c, String text) {
+        TextView tv = new TextView(c);
+        tv.setText(text);
+        tv.setTextSize(12);
+        tv.setSingleLine(true);
+        tv.setPadding(dp(c, 10), dp(c, 4), dp(c, 10), dp(c, 4));
+        return tv;
+    }
+
+    private static int dp(Context c, int v) {
+        return Math.round(v * c.getResources().getDisplayMetrics().density);
     }
 
     @Override
     public int getItemCount() {
         return items.size();
+    }
+
+    /** Ring / accent colour for a verdict. */
+    public static int ringColor(MatchResult.Verdict v) {
+        switch (v) {
+            case APPLY: return Color.parseColor("#3FA66B");
+            case WAIT:  return Color.parseColor("#E0A030");
+            case AVOID: return Color.parseColor("#D9534F");
+            default:    return Color.parseColor("#9A94B0");
+        }
     }
 
     /** Coloured pill for a verdict. Fixed light fills with dark text so it reads in both themes. */
@@ -95,16 +153,18 @@ public class JobMatchAdapter extends RecyclerView.Adapter<JobMatchAdapter.Holder
     }
 
     static class Holder extends RecyclerView.ViewHolder {
-        final TextView score, title, verdict, meta, have, missing, warning;
+        final ScoreRingView ring;
+        final TextView title, verdict, company, meta, warning;
+        final ChipGroup chips;
 
         Holder(@NonNull View v) {
             super(v);
-            score = v.findViewById(R.id.tvScore);
+            ring = v.findViewById(R.id.scoreRing);
             title = v.findViewById(R.id.tvJobTitle);
             verdict = v.findViewById(R.id.tvVerdict);
+            company = v.findViewById(R.id.tvJobCompany);
             meta = v.findViewById(R.id.tvJobMeta);
-            have = v.findViewById(R.id.tvHave);
-            missing = v.findViewById(R.id.tvMissing);
+            chips = v.findViewById(R.id.skillChips);
             warning = v.findViewById(R.id.tvWarning);
         }
     }

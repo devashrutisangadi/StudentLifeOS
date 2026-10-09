@@ -26,7 +26,7 @@ import java.util.List;
 /** The Jobs tab: internships ranked by how well they fit the student's skills. */
 public class JobsFragment extends Fragment {
 
-    private enum VerdictFilter { ALL, APPLY, WAIT }
+    private enum VerdictFilter { ALL, APPLY, WAIT, SKIP }
 
     private static final int PAID_AT_LEAST = 10000;
 
@@ -39,7 +39,7 @@ public class JobsFragment extends Fragment {
     private int totalJobs = 0;
 
     private JobMatchAdapter adapter;
-    private LinearLayout filterChips;
+    private LinearLayout filterChips, statsRow;
     private View filterScroll, emptyBox;
     private RecyclerView recycler;
     private TextView tvSubtitle, tvCount, tvEmptyTitle, tvEmptyBody;
@@ -53,6 +53,7 @@ public class JobsFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_jobs, container, false);
 
         filterChips = v.findViewById(R.id.filterChips);
+        statsRow = v.findViewById(R.id.statsRow);
         filterScroll = v.findViewById(R.id.filterScroll);
         emptyBox = v.findViewById(R.id.jobsEmpty);
         recycler = v.findViewById(R.id.recyclerJobs);
@@ -129,6 +130,7 @@ public class JobsFragment extends Fragment {
                     "Add the skills you know and we'll rank " + totalJobs + " internships by how well you fit.",
                     true);
             filterScroll.setVisibility(View.GONE);
+            statsRow.setVisibility(View.GONE);
             tvCount.setVisibility(View.GONE);
             adapter.submit(new ArrayList<>());
             return;
@@ -139,11 +141,13 @@ public class JobsFragment extends Fragment {
                 + (role != null ? " · target: " + role : ""));
         filterScroll.setVisibility(View.VISIBLE);
         tvCount.setVisibility(View.VISIBLE);
+        renderStats();
 
         List<MatchResult> shown = new ArrayList<>();
         for (MatchResult r : ranked) {
             if (verdictFilter == VerdictFilter.APPLY && r.verdict != MatchResult.Verdict.APPLY) continue;
             if (verdictFilter == VerdictFilter.WAIT && r.verdict != MatchResult.Verdict.WAIT) continue;
+            if (verdictFilter == VerdictFilter.SKIP && r.verdict != MatchResult.Verdict.SKIP) continue;
             if (remoteOnly && !r.job.remote) continue;
             if (paidOnly && !r.job.paysAtLeast(PAID_AT_LEAST)) continue;
             shown.add(r);
@@ -170,13 +174,65 @@ public class JobsFragment extends Fragment {
 
     private void renderFilterChips() {
         filterChips.removeAllViews();
-        addChip("All", verdictFilter == VerdictFilter.ALL, () -> verdictFilter = VerdictFilter.ALL);
-        addChip("Apply", verdictFilter == VerdictFilter.APPLY, () -> verdictFilter =
-                verdictFilter == VerdictFilter.APPLY ? VerdictFilter.ALL : VerdictFilter.APPLY);
-        addChip("Wait", verdictFilter == VerdictFilter.WAIT, () -> verdictFilter =
-                verdictFilter == VerdictFilter.WAIT ? VerdictFilter.ALL : VerdictFilter.WAIT);
+        addChip("All", verdictFilter == VerdictFilter.ALL && !remoteOnly && !paidOnly, () -> {
+            verdictFilter = VerdictFilter.ALL;
+            remoteOnly = false;
+            paidOnly = false;
+        });
         addChip("Remote", remoteOnly, () -> remoteOnly = !remoteOnly);
         addChip("₹10k+", paidOnly, () -> paidOnly = !paidOnly);
+    }
+
+    /** Three tiles: how many listings are Apply / Wait / Skip. Tap one to filter to it; tap again to clear. */
+    private void renderStats() {
+        int apply = 0, wait = 0, skip = 0;
+        for (MatchResult r : ranked) {
+            if (r.verdict == MatchResult.Verdict.APPLY) apply++;
+            else if (r.verdict == MatchResult.Verdict.WAIT) wait++;
+            else if (r.verdict == MatchResult.Verdict.SKIP) skip++;
+        }
+        statsRow.removeAllViews();
+        statsRow.setVisibility(View.VISIBLE);
+        addTile(apply, MatchResult.Verdict.APPLY, VerdictFilter.APPLY);
+        addTile(wait, MatchResult.Verdict.WAIT, VerdictFilter.WAIT);
+        addTile(skip, MatchResult.Verdict.SKIP, VerdictFilter.SKIP);
+    }
+
+    private void addTile(int count, MatchResult.Verdict verdict, VerdictFilter filter) {
+        boolean selected = verdictFilter == filter;
+        int accent = JobMatchAdapter.ringColor(verdict);
+
+        LinearLayout tile = new LinearLayout(requireContext());
+        tile.setOrientation(LinearLayout.VERTICAL);
+        tile.setGravity(Gravity.CENTER);
+        tile.setPadding(dp(8), dp(12), dp(8), dp(12));
+        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+        bg.setCornerRadius(dp(16));
+        bg.setColor(selected ? accent : (accent & 0x00FFFFFF) | 0x26000000); // solid when selected, 15% tint otherwise
+        tile.setBackground(bg);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        lp.setMargins(dp(4), 0, dp(4), 0);
+        tile.setLayoutParams(lp);
+
+        TextView number = new TextView(requireContext());
+        number.setText(String.valueOf(count));
+        number.setTextSize(22);
+        number.setTypeface(null, android.graphics.Typeface.BOLD);
+        number.setTextColor(selected ? android.graphics.Color.WHITE : accent);
+        TextView label = new TextView(requireContext());
+        label.setText(verdict.label());
+        label.setTextSize(12);
+        label.setTextColor(selected ? android.graphics.Color.WHITE
+                : ContextCompat.getColor(requireContext(), R.color.subject_secondary_text));
+        tile.addView(number);
+        tile.addView(label);
+
+        tile.setOnClickListener(x -> {
+            verdictFilter = selected ? VerdictFilter.ALL : filter;
+            renderFilterChips();
+            render();
+        });
+        statsRow.addView(tile);
     }
 
     private void addChip(String label, boolean selected, Runnable onTap) {

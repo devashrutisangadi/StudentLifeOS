@@ -1,35 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
+    android:layout_marginBottom="14dp"
     android:background="@drawable/bg_subject_card"
     android:clickable="true"
     android:focusable="true"
     android:orientation="horizontal"
-    android:padding="14dp">
+    android:padding="16dp">
 
-    <LinearLayout
-        android:layout_width="52dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="12dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tvScore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="fit"
-            android:textColor="@color/subject_secondary_text"
-            android:textSize="11sp" />
-    </LinearLayout>
+    <com.example.studentlifeos.ScoreRingView
+        android:id="@+id/scoreRing"
+        android:layout_width="58dp"
+        android:layout_height="58dp"
+        android:layout_marginEnd="14dp" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -40,7 +25,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
+            android:gravity="top"
             android:orientation="horizontal">
 
             <TextView
@@ -50,7 +35,7 @@
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:textSize="16sp"
+                android:textSize="17sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -67,35 +52,38 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/tvJobCompany"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/subject_secondary_text"
+            android:textSize="13sp" />
+
+        <TextView
             android:id="@+id/tvJobMeta"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textColor="@color/subject_secondary_text"
-            android:textSize="12sp" />
+            android:textSize="13sp" />
 
-        <TextView
-            android:id="@+id/tvHave"
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/skillChips"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textSize="12sp" />
-
-        <TextView
-            android:id="@+id/tvMissing"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textColor="@color/subject_secondary_text"
-            android:textSize="12sp" />
+            android:layout_marginTop="10dp"
+            app:chipSpacingHorizontal="6dp"
+            app:chipSpacingVertical="6dp" />
 
         <TextView
             android:id="@+id/tvWarning"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="8dp"
             android:textColor="@color/danger_border"
-            android:textSize="12sp"
+            android:textSize="13sp"
             android:visibility="gone" />
     </LinearLayout>
 </LinearLayout>

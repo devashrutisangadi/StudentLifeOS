@@ -65,7 +65,11 @@ public class JobDetailActivity extends AppCompatActivity {
         boolean avoid = r.verdict == MatchResult.Verdict.AVOID;
         boolean noProfile = profile.isEmpty();
 
-        ((TextView) findViewById(R.id.tvDetailScore)).setText(avoid || noProfile ? "–" : r.score + "%");
+        ScoreRingView ring = findViewById(R.id.detailRing);
+        if (avoid) ring.set(0, JobMatchAdapter.ringColor(r.verdict), "!");
+        else if (noProfile) ring.set(0, JobMatchAdapter.ringColor(r.verdict), "–");
+        else ring.set(r.score, JobMatchAdapter.ringColor(r.verdict), r.score + "%");
+        findViewById(R.id.tvDetailFit).setVisibility(avoid ? View.INVISIBLE : View.VISIBLE);
         JobMatchAdapter.styleVerdict(findViewById(R.id.tvDetailVerdict), r.verdict);
         if (noProfile && !avoid) findViewById(R.id.tvDetailVerdict).setVisibility(View.GONE);
         ((TextView) findViewById(R.id.tvDetailTitle)).setText(job.title);
