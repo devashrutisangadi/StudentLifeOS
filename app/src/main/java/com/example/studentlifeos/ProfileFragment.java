@@ -58,6 +58,8 @@ public class ProfileFragment extends Fragment {
         view.findViewById(R.id.btnEditProfile).setOnClickListener(v ->
                 startActivity(new Intent(getContext(), EditProfileActivity.class))
         );
+        view.findViewById(R.id.btnMySkills).setOnClickListener(v ->
+                startActivity(new Intent(getContext(), SkillsProfileActivity.class)));
 
         view.findViewById(R.id.btnLogout).setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
